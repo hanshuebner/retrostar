@@ -34,7 +34,8 @@ client
 remote retrostar.classic-computing.de $port
 proto udp
 dev tap
-up "/bin/bash -c '/usr/sbin/brctl addif br0 \$0 && ifconfig \$0 up'"
+up "/etc/retrostar/if-up.sh"
+down "/etc/retrostar/if-down.sh"
 data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305
 cipher AES-256-GCM
 key-direction 1
