@@ -1,0 +1,11 @@
+[Unit]
+Description=Retrostar Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/connect-retrostar
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,38 @@
+[ req ]
+prompt = no
+distinguished_name = dn
+x509_extensions = v3_ca
+
+[ dn ]
+commonName = RetroStar CA
+
+[ v3_ca ]
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints = critical, CA:true
+crlDistributionPoints = URI:https://retrostar.classic-computing.de/crl.pem
+
+[ ca ]
+default_ca = retrostar_ca
+
+[ retrostar_ca ]
+default_md = sha256
+dir = data
+certificate = $dir/ca.crt
+private_key = $dir/ca.key
+database = $dir/index.txt
+serial = $dir/serial
+new_certs_dir=$dir
+crlnumber = $dir/crlnumber
+crl_dir = $dir/crl
+policy = policy_match
+default_days = 1825
+
+# For the CA policy
+[ policy_match ]
+countryName		= optional
+stateOrProvinceName	= optional
+organizationName	= optional
+organizationalUnitName	= optional
+commonName		= supplied
+emailAddress		= optional
+
