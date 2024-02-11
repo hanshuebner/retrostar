@@ -4,3 +4,5 @@ Architecture: all
 Maintainer: Hans Hübner <hans.huebner@gmail.com>
 Depends: openvpn, bridge-utils, ebtables
 Description: This is the client package needed to connect to the RetroStar network
+Postinst: DEBIAN/postinst
+
