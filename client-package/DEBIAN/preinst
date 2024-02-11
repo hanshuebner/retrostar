@@ -1,0 +1,45 @@
+#!/bin/bash
+
+cat <<\EOD
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+////////////////////////////////////////////////////////////////////////////////
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+Dieses Paket installiert den RetroStar-Client.  Du benötigst Deinen persönlichen
+Installationsschlüssel, den Du auf
+
+      https://retrostar.classic-computing.de/install-key
+
+abrufen kannst.
+
+////////////////////////////////////////////////////////////////////////////////
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+////////////////////////////////////////////////////////////////////////////////
+
+EOD
+
+regex='^[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}$'
+
+while true; do
+    read -p "Gib Deinen Installationsschlüssel ein (Abbruch mit ENTER): " token
+    if [[ $token == "" ]]; then
+        echo "Installation abgebrochen"
+        exit 1
+    fi
+    if [[ ! $token =~ $regex ]]; then
+        echo "Ungültiges Format."
+        continue
+    fi
+    mkdir -p /etc/retrostar
+    if curl --silent --fail -Lo /etc/retrostar/openvpn.conf https://retrostar.classic-computing.de/client-conf/$token
+    then
+        break
+    else
+        echo "Ungültiger Installationsschlüssel."
+    fi
+done
+
+cat <<\EOD
+
+Deine Konfiguration wurde unter /etc/retrostar/openvpn.conf gespeichert
+EOD

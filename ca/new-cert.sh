@@ -40,8 +40,6 @@ data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305
 cipher AES-256-GCM
 key-direction 1
 keepalive 5 15
-log-append  /var/log/openvpn.log
-verb 4
 script-security 2
 <ca>
 $(cat "$CA_CRT")

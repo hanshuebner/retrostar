@@ -2,7 +2,7 @@
 
 set -e
 
-CONFIG=/etc/retrostar.conf
+CONFIG=/etc/retrostar/openvpn.conf
 
 if [ $EUID -ne 0 ]
 then

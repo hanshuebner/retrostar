@@ -4,7 +4,7 @@
 
 PATH=/usr/sbin:/usr/bin
 
-IF=$0
+IF=$1
 
 brctl addif br0 $IF
 ifconfig $IF up
