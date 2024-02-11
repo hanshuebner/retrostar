@@ -18,7 +18,32 @@ abrufen kannst.
 
 EOD
 
-regex='^[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}$'
+token_regex='^[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}$'
+
+if ip r | grep -q '^default.* eth0 '
+then
+    cat <<\EOD
+
+Der Raspberry Pi hat eine Default-Route auf dem Ethernet-Interface.
+Für den Betrieb mit RetroStar muss die Internetverbindung über WLAN
+hergestellt werden.  Auf dem Ethernet-Interface muss IP abgeschaltet
+werden.  In älteren Betriebssystemversionen geht das, indem die Zeile
+
+denyinterfaces eth0
+
+am Anfang der Datei /etc/dhcpcd.conf eingefügt wird.  In bookworm oder
+später kann es durch den Befehl
+
+sudo nmcli dev disconnect iface eth0
+
+abgeschaltet werden.
+
+Starte den Pi nach der Konfigurationsänderung neu und versuche diese
+Installation dann noch einmal.
+EOD
+    exit 1
+fi
+
 
 while true; do
     read -p "Gib Deinen Installationsschlüssel ein (Abbruch mit ENTER): " token
@@ -26,7 +51,7 @@ while true; do
         echo "Installation abgebrochen"
         exit 1
     fi
-    if [[ ! $token =~ $regex ]]; then
+    if [[ ! $token =~ $token_regex ]]; then
         echo "Ungültiges Format."
         continue
     fi
