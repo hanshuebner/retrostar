@@ -29,7 +29,9 @@ ebtables --flush
 ebtables -A FORWARD --protocol arp -j DROP
 ebtables -A FORWARD --protocol ipv4 -j DROP
 ebtables -A FORWARD --protocol ipv6 -j DROP
-
-sysctl -q -w net.ipv6.conf.br0.disable_ipv6=1
+ebtables -A FORWARD --protocol ipv6 -j DROP
+# fritz.box zeug:
+ebtables -A FORWARD --protocol 0x88e1 -j DROP
+ebtables -A FORWARD --protocol 0x8912 -j DROP
 
 openvpn --config $CONFIG --verb 3
