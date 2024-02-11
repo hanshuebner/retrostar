@@ -1,14 +1,35 @@
 #!/usr/bin/bash
 
-modprobe ebtable_filter
-brctl addbr br0
-ifconfig br0 up
-brctl addif br0 eth0
-ifconfig eth0 up
+set -e
 
+CONFIG=/etc/retrostar.conf
+
+if [ $EUID -ne 0 ]
+then
+    echo "$0: Dieses Skript muss mit 'sudo' aufgerufen werden" >&2
+    exit 1
+fi
+
+if [ ! -f "$CONFIG" ]
+then
+    echo "$0: Konfigurationsdatei $CONFIG nicht gefunden" >&2
+    exit 1
+fi
+
+modprobe ebtable_filter
+if ! ip link show br0 &>/dev/null
+then
+    brctl addbr br0
+    ifconfig br0 up
+    brctl addif br0 eth0
+    ifconfig eth0 up
+fi
+
+ebtables --flush
 ebtables -A FORWARD --protocol arp -j DROP
 ebtables -A FORWARD --protocol ipv4 -j DROP
 ebtables -A FORWARD --protocol ipv6 -j DROP
 
-sysctl -w net.ipv6.conf.tap0.disable_ipv6=1
-sysctl -w net.ipv6.conf.br0.disable_ipv6=1
+sysctl -q -w net.ipv6.conf.br0.disable_ipv6=1
+
+openvpn --config $CONFIG --verb 3
