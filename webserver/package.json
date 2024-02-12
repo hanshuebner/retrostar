@@ -1,0 +1,27 @@
+{
+  "name": "koa-server",
+  "version": "1.0.0",
+  "description": "Koa web server with GitHub OAuth2 authentication",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "mocha",
+    "format": "prettier --write \"src/**/*.js\""
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "^2.13.0",
+    "koa-passport": "^5.0.0",
+    "koa-router": "^10.0.0",
+    "koa-session": "^6.0.0",
+    "koa-static": "^5.0.0",
+    "passport-github2": "^0.1.12"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^9.1.1",
+    "prettier": "^2.5.0",
+    "supertest": "^6.1.6"
+  }
+}
