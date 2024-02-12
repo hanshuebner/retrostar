@@ -5,18 +5,43 @@ cat <<\EOD
 ////////////////////////////////////////////////////////////////////////////////
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-Dieses Paket installiert den RetroStar-Client.  Du benötigst Deinen persönlichen
-Installationsschlüssel, den Du auf
-
-      https://retrostar.classic-computing.de/install-key
-
-abrufen kannst.
-
-////////////////////////////////////////////////////////////////////////////////
-\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-////////////////////////////////////////////////////////////////////////////////
-
 EOD
+
+is_ssh_process() {
+    local pid=$1
+    local comm
+    read -r comm < "/proc/$pid/comm"
+    [ "$comm" == "sshd" ]
+}
+
+is_ssh6_connection() {
+    local pid=$$
+    local stat
+    while [ $pid -ne 1 ]; do
+        read -r _ _ _ ppid _ < "/proc/$pid/stat"
+        if is_ssh_process "$ppid"; then
+            if lsof -p $ppid | awk '$5 == "IPv6" { exit 1 }'; then
+                return 1
+            else
+                return 0
+            fi
+        fi
+        pid=$ppid
+    done
+    return 1 # Return false if no SSH daemon is found
+}
+
+if is_ssh6_connection; then
+    cat <<\EOD
+
+Du bist über IPv6 mit dem Raspberry Pi verbunden.  Da IPv6 im Verlauf der
+Installation abgeschaltet wird, musst Du Dich mit IPv4 verbinden oder die
+Einrichtung auf der Konsole machen.
+
+Die Installation wird abgebrochen.
+EOD
+    exit 1
+fi
 
 token_regex='^[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}$'
 
@@ -44,6 +69,30 @@ EOD
     exit 1
 fi
 
+cat <<\EOD
+
+Dieses Paket installiert den RetroStar-Client.  Du benötigst Deinen persönlichen
+Installationsschlüssel, den Du auf
+
+      https://retrostar.classic-computing.de/install-key
+
+abrufen kannst.
+
+ACHTUNG: Die Netzwerkkonfiguration wird entsprechend den Erfordernissen der
+OpenVPN-Bridge angepasst.  IPv6 wird komplett abgeschaltet und eine virtuelle
+Bridge eingerichtet, die das Ethernet des Pi transparent mit dem gemeinsamen
+Retro-LAN verbindet.  IP-Pakete werden nicht weitergeleitet, aber es empfiehlt
+sich dennoch, auf dem Ethernet keine wichtigen Dinge zu machen, da über die
+Bridge allerlei bunter Verkehr hereinkommen kann.
+
+Wenn Du nicht fortfahren möchtest, kannst Du die Installation mit Ctrl-C
+abbrechen.
+
+////////////////////////////////////////////////////////////////////////////////
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+////////////////////////////////////////////////////////////////////////////////
+
+EOD
 
 while true; do
     read -p "Gib Deinen Installationsschlüssel ein (Abbruch mit ENTER): " token
