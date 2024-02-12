@@ -1,5 +1,8 @@
 require('dotenv').config() // Load environment variables from .env file
 
+const fs = require('fs')
+const marked = require('marked')
+const ejs = require('ejs')
 const Koa = require('koa')
 const Router = require('koa-router')
 const static = require('koa-static')
@@ -15,7 +18,7 @@ app.use(static(__dirname + '/../public'))
 console.log('static files:', __dirname + '/../public')
 
 // Session middleware
-app.keys = ['your-secret-key'] // Change this to a secret key for session encryption
+app.keys = [process.env.SESSION_SECRET]
 app.use(session({}, app))
 
 // Initialize passport middleware
@@ -47,14 +50,49 @@ passport.deserializeUser((user, done) => {
   done(null, user)
 })
 
-// Protected endpoint, requires authentication
-router.get('/api/user', (ctx) => {
+const isAuthenticated = async (ctx, next) => {
   if (ctx.isAuthenticated()) {
-    ctx.body = `Hello, ${ctx.state.user.username}!`
+    await next()
   } else {
-    ctx.status = 401
-    ctx.body = 'Unauthorized'
+    if (ctx.accepts('html')) {
+      await passport.authenticate('github')(ctx, next)
+    } else {
+      ctx.status = 403
+      ctx.body = 'Forbidden'
+    }
   }
+}
+
+const markdownOptions = {
+  // Add your custom options here
+  renderer: new marked.Renderer(), // Use the default renderer
+  gfm: true, // Enable GitHub Flavored Markdown
+  breaks: true, // Enable line breaks
+  // Add more options as needed
+}
+
+router.get('/install-key', isAuthenticated, (ctx) => {
+  const username = ctx.state.user.username // Get the username from the authenticated user
+
+  // Read the Markdown template file
+  const template = fs.readFileSync(
+    __dirname + '/../templates/install-key.md',
+    'utf8'
+  )
+
+  const expanded = ejs.render(template, { username })
+
+  // Convert Markdown to HTML with custom options
+  const html = marked.parse(expanded, markdownOptions)
+
+  // Send the HTML response
+  ctx.type = 'html'
+  ctx.body = html
+})
+
+// Protected endpoint, requires authentication
+router.get('/api/user', isAuthenticated, (ctx) => {
+  ctx.body = `Hello, ${ctx.state.user.username}!`
 })
 
 // GitHub authentication route
