@@ -73,10 +73,7 @@ router.get(
 )
 
 // Logout route
-router.get('/logout', (ctx) => {
-  ctx.logout()
-  ctx.redirect('/')
-})
+router.get('/logout', (ctx) => ctx.logout(() => ctx.redirect('/')))
 
 app.use(router.routes())
 app.use(router.allowedMethods())
