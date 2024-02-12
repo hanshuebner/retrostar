@@ -32,11 +32,13 @@ is_ssh6_connection() {
 }
 
 if is_ssh6_connection; then
-    cat <<\EOD
+    cat <<EOD
 
 Du bist über IPv6 mit dem Raspberry Pi verbunden.  Da IPv6 im Verlauf der
 Installation abgeschaltet wird, musst Du Dich mit IPv4 verbinden oder die
-Einrichtung auf der Konsole machen.
+Einrichtung auf der Konsole machen.  Unter Linux geht das mit dem Befehl
+
+        ssh -4 $(hostname)
 
 Die Installation wird abgebrochen.
 EOD
