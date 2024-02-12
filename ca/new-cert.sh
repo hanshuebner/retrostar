@@ -23,10 +23,16 @@ CA_CRT="$CA_DIR/ca.crt"
 CA_SERIAL="$CA_DIR/serial"
 TA_KEY="$CA_DIR/ta.key"
 
+generate_random_string() {
+    tr -dc ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 < /dev/urandom | head -c $1
+}
+
+install_key="$(generate_random_string 4)-$(generate_random_string 4)"
+
 echo Generating key
 openssl req -new -newkey rsa:2048 -nodes -keyout "$OUTPUT_KEY" -out "$OUTPUT_CSR" -subj "/CN=$client_name"
 echo Generating cert
-openssl ca -config "$CA_CONF" -batch -in "$OUTPUT_CSR" -out "$OUTPUT_CERT"
+openssl ca -config "$CA_CONF" -batch -in "$OUTPUT_CSR" -out "$OUTPUT_CERT" -extensions "subjectAltName = install-key:$install_key"
 port=$(openssl x509 -in "$OUTPUT_CERT" -text -noout | perl -ne '/Serial Number: (\d+)/ && print $1')
 echo Allocated UDP port $port
 cat > "$OUTPUT_OVPN" <<EOF
