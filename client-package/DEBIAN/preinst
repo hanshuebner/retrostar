@@ -17,11 +17,10 @@ is_ssh_process() {
 
 is_ssh6_connection() {
     local pid=$$
-    local stat
     while [ $pid -ne 1 ]; do
         read -r _ _ _ ppid _ < "/proc/$pid/stat"
         if is_ssh_process "$ppid"; then
-            if lsof -p $ppid | awk '$5 == "IPv6" { exit 1 }'; then
+            if lsof -p "$ppid" | awk '$5 == "IPv6" { exit 1 }'; then
                 return 1
             else
                 return 0
@@ -120,7 +119,7 @@ EOD
 token_regex='^[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}$'
 
 while true; do
-    read -p "Gib Deinen Installationsschlüssel ein (Abbruch mit ENTER): " token
+    read -rp "Gib Deinen Installationsschlüssel ein (Abbruch mit ENTER): " token
     if [[ $token == "" ]]; then
         echo "Installation abgebrochen"
         exit 1
@@ -130,7 +129,7 @@ while true; do
         continue
     fi
     mkdir -p /etc/retrostar
-    if curl --silent --fail -Lo /etc/retrostar/openvpn.conf https://retrostar.classic-computing.de/client-conf/$token
+    if curl --silent --fail -Lo /etc/retrostar/openvpn.conf https://retrostar.classic-computing.de/client-conf/"$token"
     then
         break
     else
