@@ -18,4 +18,4 @@ function ethernetToDECnet(macAddress) {
 
 // Test the function
 const macAddress = 'aa:00:04:00:15:5c'
-console.log(ethernetToDECnet(macAddress)) // Example output: "40.23"
+console.log(ethernetToDECnet(macAddress)) // Example output: "23.21"
