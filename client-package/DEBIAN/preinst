@@ -5,6 +5,7 @@ cat <<\EOD
 ////////////////////////////////////////////////////////////////////////////////
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+RetroStar Client-Installation
 EOD
 
 is_ssh_process() {
@@ -45,7 +46,27 @@ EOD
     exit 1
 fi
 
-token_regex='^[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}$'
+
+if ! ip a | grep -q ': eth0:'
+then
+    cat <<\EOD
+
+Es wurde kein Ethernet-Interface mit dem Namen "eth0" gefunden.  Es kann sein,
+dass es unter einem anderen Namen angelegt wurde.  Zur Korrektur dann wie folgt
+vorgehen:
+
+sudo raspi-config
+
+"Advanced Options" auswählen
+"Network Interface Names" auswählen
+"Would you like to enable predictable network interface names?" mit "Yes" beantworten.
+
+"Finish" auswählen und die Frage nach Reboot mit "Yes" beantworten.
+
+Dann diese Installation neu starten.
+EOD
+    exit 1
+fi
 
 if ip r | grep -q '^default.* eth0 '
 then
@@ -95,6 +116,8 @@ abbrechen.
 ////////////////////////////////////////////////////////////////////////////////
 
 EOD
+
+token_regex='^[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}$'
 
 while true; do
     read -p "Gib Deinen Installationsschlüssel ein (Abbruch mit ENTER): " token
