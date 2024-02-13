@@ -22,8 +22,8 @@ OpenVPN-Konfigurationsdatei auch herunterladen.
 
 https://retrostar.classic-computing.de/client-conf/<%= data.installKey %>.
 
-Schau Dir den [Quellcode](https://github.com/hanshuebner/retrostar/tree/main/client-package)
-an, wenn Du wissen willst, wie RetroStar funktioniert.
+Schau Dir den [Quellcode](https://github.com/hanshuebner/retrostar/tree/main/client-package) an,
+wenn Du wissen willst, wie RetroStar funktioniert.
 
 <% } else { %>
 
