@@ -80,7 +80,12 @@ router.get('/install-key', isAuthenticated, (ctx) => {
     'utf8'
   )
 
-  const expanded = ejs.render(template, { username })
+  const expanded = ejs.render(template, {
+    data: {
+      username,
+      installKey: '0000-2222',
+    },
+  })
 
   // Convert Markdown to HTML with custom options
   const html = marked.parse(expanded, markdownOptions)

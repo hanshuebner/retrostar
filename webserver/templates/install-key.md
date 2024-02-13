@@ -1,11 +1,32 @@
-# Installation Key
+# RetroStar Zugang
 
-Hello <%= username %>,
+Hallo <%= data.username %>,
 
-To install the key, follow the instructions below:
+<% if (data.installKey) { %>
 
-1. Open your application.
-2. Go to Settings.
-3. Navigate to the Security section.
-4. Click on "Install Key".
-5. Follow the on-screen instructions.
+die Installation des RetroStar-Zugangs geht bequem mit dem Debian-Paket,
+das Du wie folgt installieren kannst:
+
+```shell
+sudo apt update
+curl -LO https://retrostar.classic-computing.de/retrostar-client-1.0.deb
+sudo apt install -y ./retrostar-client-1.0.deb
+rm ./retrostar-client-1.0.deb
+```
+
+Während der Installation wirst Du nach Deinem Installationsschlüssel gefragt,
+er lautet **<%= data.installKey %>**.
+
+Falls Du die Konfiguration lieber manuell durchführen möchtest, kannst Du Dir die
+OpenVPN-Konfigurationsdatei auch herunterladen.
+
+https://retrostar.classic-computing.de/client-conf/<%= data.installKey %>.
+
+Schau Dir den [Quellcode](https://github.com/hanshuebner/retrostar/tree/main/client-package)
+an, wenn Du wissen willst, wie RetroStar funktioniert.
+
+<% } else { %>
+
+für Dich ist noch kein Zugang zum RetroStar eingerichtet.
+
+<% } %>
