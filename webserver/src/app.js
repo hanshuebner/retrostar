@@ -9,6 +9,7 @@ const static = require('koa-static')
 const session = require('koa-session')
 const passport = require('koa-passport')
 const GitHubStrategy = require('passport-github2').Strategy
+const allocateDbConnection = require('./db')
 
 const app = new Koa()
 const router = new Router()
@@ -62,6 +63,24 @@ const isAuthenticated = async (ctx, next) => {
     }
   }
 }
+
+app.use(allocateDbConnection)
+
+router.get('/client-config/:installKey', async (ctx) => {
+  const installKey = ctx.params.installKey?.toUpperCase()
+
+  const query =
+    'SELECT configuration FROM openvpn_configuration WHERE install_key = $1'
+  const result = await ctx.db.query(query, [installKey])
+
+  if (result.rows.length > 0) {
+    ctx.type = 'text/plain'
+    ctx.body = result.rows[0].configuration
+  } else {
+    ctx.status = 404
+    ctx.body = 'Configuration not found'
+  }
+})
 
 const markdownOptions = {
   // Add your custom options here

@@ -62,4 +62,6 @@ $(cat "$TA_KEY")
 EOF
 rm "$OUTPUT_CSR"
 echo "$OUTPUT_OVPN" created
-cp "$OUTPUT_OVPN" /var/www/html/conf/
+config_content=$(<$OUTPUT_OVPN)
+config_content_escaped=$(printf '%s' "$config_content" | sed "s/'/''/g")
+psql -d retrostar -c "SELECT insert_openvpn_configuration('bla', E'$config_content_escaped');"
