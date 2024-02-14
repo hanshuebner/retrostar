@@ -1,11 +1,37 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
-CREATE EXTENSION if NOT EXISTS "pgcrypto" WITH SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA public;
 
 CREATE TABLE public."user"
 (
-    id   uuid PRIMARY KEY DEFAULT public.uuid_generate_v1(),
-    name VARCHAR UNIQUE NOT NULL
+    id            uuid PRIMARY KEY DEFAULT public.uuid_generate_v1(),
+    name          VARCHAR UNIQUE NOT NULL,
+    password_hash TEXT           NOT NULL,
+    salt          TEXT           NOT NULL
+
 );
+
+CREATE OR REPLACE FUNCTION set_password(username VARCHAR, password TEXT) RETURNS VOID AS $$
+DECLARE
+    s TEXT := gen_salt('bf');
+BEGIN
+    UPDATE public."user"
+    SET password_hash = crypt(password, s),
+        salt = s
+    WHERE name = username;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION check_password(username VARCHAR, password TEXT) RETURNS BOOLEAN AS $$
+DECLARE
+    hashed_password TEXT;
+BEGIN
+    SELECT password_hash INTO hashed_password
+    FROM public."user"
+    WHERE name = username;
+
+    RETURN hashed_password = crypt(password, hashed_password);
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION random_alphanumeric_char()
     RETURNS CHAR AS
@@ -62,7 +88,8 @@ CREATE TABLE public.openvpn_configuration
     hash        TEXT                        NOT NULL UNIQUE
 );
 
-CREATE FUNCTION hash_certificate() RETURNS trigger AS $$
+CREATE FUNCTION hash_certificate() RETURNS TRIGGER AS
+$$
 BEGIN
     NEW.hash := digest(NEW.certificate, 'sha256');
     RETURN NEW;
@@ -70,8 +97,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER hash_certificate_trigger
-    BEFORE INSERT OR UPDATE ON openvpn_configuration
-    FOR EACH ROW EXECUTE PROCEDURE hash_certificate();
+    BEFORE INSERT OR UPDATE
+    ON openvpn_configuration
+    FOR EACH ROW
+EXECUTE PROCEDURE hash_certificate();
 
 CREATE OR REPLACE FUNCTION insert_openvpn_configuration(user_name VARCHAR, certificate TEXT, private_key TEXT)
     RETURNS VOID AS

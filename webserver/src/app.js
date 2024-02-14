@@ -5,6 +5,7 @@ const marked = require('marked')
 const ejs = require('ejs')
 const Koa = require('koa')
 const Router = require('koa-router')
+const bodyParser = require('koa-bodyparser')
 const koaStatic = require('koa-static')
 const session = require('koa-session')
 const passport = require('koa-passport')
@@ -17,12 +18,10 @@ const path = require('path')
 
 const resolvePath = (...components) => path.join(__dirname, '..', ...components)
 
-const readFileSync = (...components) => {
-  const filename = resolvePath(...components)
-  return fs.readFileSync(filename, { encoding: 'utf8' })
-}
+const readFileSync = (...components) =>
+  fs.readFileSync(resolvePath(...components), { encoding: 'utf8' })
 
-// Serve static files
+app.use(bodyParser())
 app.use(koaStatic(resolvePath('public')))
 
 // Session middleware
@@ -48,6 +47,28 @@ passport.use(
   )
 )
 
+const LocalStrategy = require('passport-local').Strategy
+
+// Define the Local strategy for username/password authentication
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      // Call the checkUser function to verify the username/password
+      const user = await db.checkPassword(username, password)
+
+      if (user) {
+        // If the user is found and the password is correct, return the user
+        done(null, user)
+      } else {
+        // If the user is not found or the password is incorrect, return false
+        done(null, false)
+      }
+    } catch (error) {
+      done(error)
+    }
+  })
+)
+
 // Serialize user into session
 passport.serializeUser((user, done) => {
   done(null, user)
@@ -63,7 +84,8 @@ const isAuthenticated = async (ctx, next) => {
     await next()
   } else {
     if (ctx.accepts('html')) {
-      await passport.authenticate('github')(ctx, next)
+      ctx.redirect('/login')
+      // await passport.authenticate('github')(ctx, next)
     } else {
       ctx.status = 403
       ctx.body = 'Forbidden'
@@ -74,7 +96,7 @@ const isAuthenticated = async (ctx, next) => {
 app.use(db.middleware)
 
 const renderTemplate = (filename, data) =>
-  ejs.render(readFileSync('templates', filename), data)
+  ejs.render(readFileSync('templates', filename), { username: null, ...data })
 
 router.get('/client-config/:installKey', async (ctx) => {
   const installKey = ctx.params.installKey?.toUpperCase()
@@ -115,14 +137,21 @@ router.get('/installation', isAuthenticated, async (ctx, next) => {
 })
 
 router.get('/:page', (ctx, next) => {
+  let content = null
   if (fs.existsSync(resolvePath('templates', `${ctx.params.page}.md`))) {
-    const content = marked.parse(
+    content = marked.parse(
       renderTemplate(`${ctx.params.page}.md`, {
         data: ctx.template_data || {},
       }),
       markdownOptions
     )
+  } else if (
+    fs.existsSync(resolvePath('templates', `${ctx.params.page}.html`))
+  ) {
+    content = readFileSync('templates', `${ctx.params.page}.html`)
+  }
 
+  if (content) {
     // Send the HTML response
     ctx.type = 'html'
     ctx.body = renderTemplate('layout.ejs', {
@@ -155,6 +184,31 @@ router.get(
     failureRedirect: '/',
   })
 )
+
+router.post('/auth/login', async (ctx, next) => {
+  // Check if the request body contains username and password
+  const { username, password } = ctx.request.body
+
+  if (username && password) {
+    // Attempt Local authentication
+    await passport.authenticate('local', async (err, user, info) => {
+      if (err) {
+        ctx.status = 500
+        ctx.body = 'Internal Server Error'
+      } else if (!user) {
+        ctx.status = 401
+        ctx.body = 'Unauthorized'
+      } else {
+        // If Local authentication succeeds, log in the user
+        await ctx.login(user)
+        ctx.redirect('/')
+      }
+    })(ctx, next)
+  } else {
+    // If username or password is missing, attempt GitHub authentication
+    await passport.authenticate('github')(ctx, next)
+  }
+})
 
 // Logout route
 router.get('/logout', (ctx) => ctx.logout(() => ctx.redirect('/')))

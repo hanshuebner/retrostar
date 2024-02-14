@@ -1,14 +1,18 @@
 const { Pool } = require('pg')
+const memoize = require('memoizee')
 
-// Middleware function to allocate PostgreSQL database connection and manage transactions
-const middleware = async (ctx, next) => {
-  const client = new Pool({
+const makePool = () =>
+  new Pool({
     user: process.env.PGUSER,
     password: process.env.PGPASSWORD,
     host: process.env.PGHOST,
     database: process.env.PGDATABASE || 'retrostar',
     port: process.env.PGPORT,
   })
+
+// Middleware function to allocate PostgreSQL database connection and manage transactions
+const middleware = async (ctx, next) => {
+  const client = makePool()
 
   try {
     await client.query('BEGIN')
@@ -43,8 +47,26 @@ const getInstallKeyByUser = async (client, username) => {
   return result.rows[0]?.install_key
 }
 
+const checkPassword = async (username, password) => {
+  const client = makePool()
+  const result = await client.query('SELECT check_password($1, $2)', [
+    username,
+    password,
+  ])
+  if (!result.rows[0].check_password) {
+    return null
+  }
+  const user = await client.query(
+    'SELECT id, name AS username FROM "user" WHERE name = $1',
+    [username]
+  )
+  client.end()
+  return user.rows[0]
+}
+
 module.exports = {
   middleware,
   getConfigurationByInstallKey,
   getInstallKeyByUser,
+  checkPassword,
 }

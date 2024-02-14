@@ -55,12 +55,16 @@ body {
     padding: 16px;
 }
 
+nav .menu-right {
+    float: right;
+}
+
 .menu {
     list-style: none;
-    display: flex;
-    width: 100%;
-    background-color: #d9c052;
+    display: inline-flex;
     font-size: 160%;
+    background-color: #d9c052;
+    width: 100%;
 }
 
 .menu li {

@@ -21,6 +21,13 @@
                 <a href="status">Status</a>
             </li>
         </ul>
+        <span class="menu-right">
+            <% if (username) { %>
+                Benutzer: <%= username %> <a href="logout">Logout</a>
+            <% } else { %>
+                <a href="login">Login</a>
+            <% } %>
+        </span>
     </nav>
 </header>
 
