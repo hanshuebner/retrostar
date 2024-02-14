@@ -134,14 +134,11 @@ router.get('/:page', (ctx, next) => {
   }
 })
 
+router.redirect('/', '/news')
+
 router.get('/install.sh', (ctx) => {
   ctx.type = 'text/plain'
   ctx.body = renderTemplate('install.sh.ejs', {})
-})
-
-// Protected endpoint, requires authentication
-router.get('/api/user', isAuthenticated, (ctx) => {
-  ctx.body = `Hello, ${ctx.state.user.username}!`
 })
 
 // GitHub authentication route
