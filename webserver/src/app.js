@@ -84,7 +84,7 @@ const isAuthenticated = async (ctx, next) => {
     await next()
   } else {
     if (ctx.accepts('html')) {
-      ctx.redirect('/login')
+      ctx.redirect('/login?path=' + ctx.path)
       // await passport.authenticate('github')(ctx, next)
     } else {
       ctx.status = 403
@@ -190,12 +190,16 @@ router.post('/auth/login', async (ctx, next) => {
         ctx.status = 500
         ctx.body = 'Internal Server Error'
       } else if (!user) {
-        ctx.status = 401
-        ctx.body = 'Unauthorized'
+        if (ctx.accepts('html')) {
+          ctx.redirect('/login?error=1')
+          // await passport.authenticate('github')(ctx, next)
+        } else {
+          ctx.status = 403
+        }
       } else {
         // If Local authentication succeeds, log in the user
         await ctx.login(user)
-        ctx.redirect('/')
+        ctx.redirect(ctx.request.query.path || '/')
       }
     })(ctx, next)
   } else {
