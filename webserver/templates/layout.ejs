@@ -22,8 +22,8 @@
             </li>
         </ul>
         <span class="menu-right">
-            <% if (username) { %>
-                Benutzer: <%= username %> <a href="logout">Logout</a>
+            <% if (typeof user == 'object') { %>
+                Benutzer: <%= user.username %> <a href="logout">Logout</a>
             <% } else { %>
                 <a href="login">Login</a>
             <% } %>

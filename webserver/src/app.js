@@ -95,8 +95,8 @@ const isAuthenticated = async (ctx, next) => {
 
 app.use(db.middleware)
 
-const renderTemplate = (filename, data) =>
-  ejs.render(readFileSync('templates', filename), { username: null, ...data })
+const renderTemplate = (filename, state, data) =>
+  ejs.render(readFileSync('templates', filename), { ...state, ...(data || {}) })
 
 router.get('/client-config/:installKey', async (ctx) => {
   const installKey = ctx.params.installKey?.toUpperCase()
@@ -107,7 +107,7 @@ router.get('/client-config/:installKey', async (ctx) => {
 
   if (configuration) {
     ctx.type = 'text/plain'
-    ctx.body = renderTemplate('client-config.ejs', {
+    ctx.body = renderTemplate('client-config.ejs', ctx.state, {
       ...configuration,
       ca_certificate: readFileSync('../ca/data', 'ca.crt'),
       ta_key: readFileSync('../ca/data', 'ta.key'),
@@ -126,12 +126,8 @@ const markdownOptions = {
 
 router.get('/installation', isAuthenticated, async (ctx, next) => {
   const username = ctx.state.user.username
-  const installKey = await db.getInstallKeyByUser(ctx.db, username)
 
-  ctx.template_data = {
-    username,
-    installKey,
-  }
+  ctx.state.installKey = await db.getInstallKeyByUser(ctx.db, username)
 
   await next()
 })
@@ -140,9 +136,7 @@ router.get('/:page', (ctx, next) => {
   let content = null
   if (fs.existsSync(resolvePath('templates', `${ctx.params.page}.md`))) {
     content = marked.parse(
-      renderTemplate(`${ctx.params.page}.md`, {
-        data: ctx.template_data || {},
-      }),
+      renderTemplate(`${ctx.params.page}.md`, ctx.state),
       markdownOptions
     )
   } else if (
@@ -153,8 +147,8 @@ router.get('/:page', (ctx, next) => {
 
   if (content) {
     // Send the HTML response
-    ctx.type = 'html'
-    ctx.body = renderTemplate('layout.ejs', {
+    ctx.type = 'text/html'
+    ctx.body = renderTemplate('layout.ejs', ctx.state, {
       content,
       page_name: ctx.params.page,
     })
@@ -167,7 +161,7 @@ router.redirect('/', '/news')
 
 router.get('/install.sh', (ctx) => {
   ctx.type = 'text/plain'
-  ctx.body = renderTemplate('install.sh.ejs', {})
+  ctx.body = renderTemplate('install.sh.ejs', ctx.state)
 })
 
 // GitHub authentication route

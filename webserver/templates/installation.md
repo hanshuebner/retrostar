@@ -1,6 +1,6 @@
-Hallo <%= data.username %>,
+Hallo <%= user.username %>,
 
-<% if (data.installKey) { %>
+<% if (installKey) { %>
 
 Für den Zugang zum RetroStar benötigst Du einen [Raspberry Pi](https://www.raspberrypi.org/products/) mit
 Ethernet und WLAN. Er muss über WLAN mit dem Internet verbunden sein.
@@ -15,14 +15,14 @@ Er führt ein [Shell-Skript](/install.sh) aus, das die notwendigen Installations
 durchführt.  Während der Installation wirst Du auch nach Deinem Kennwort gefragt.  Es
 ist notwendig, damit die Änderungen an der Systemkonfiguration durchgeführt werden können.
 
-Weiterhin wirst Du nach Deinem Installationsschlüssel gefragt, er lautet `<%= data.installKey %>`
+Weiterhin wirst Du nach Deinem Installationsschlüssel gefragt, er lautet `<%= installKey %>`
 
 Beachte, dass die automatisierte Installation die Netzwerkeinstellungen des Pi
 verändert. Insbesondere wird IPv6 abgeschaltet. Falls Du die Konfiguration lieber 
 manuell durchführen möchtest, kannst Du Dir die OpenVPN-Konfigurationsdatei auch
 herunterladen:
 
-[https://retrostar.classic-computing.de/client-config/<%= data.installKey %>](/client-config/<%= data.installKey %>)
+[https://retrostar.classic-computing.de/client-config/<%= installKey %>](/client-config/<%= installKey %>)
 
 Bei der manuellen Konfiguration können wir Dir nur begrenzt helfen.
 

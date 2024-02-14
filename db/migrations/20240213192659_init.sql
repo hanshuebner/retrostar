@@ -5,18 +5,20 @@ CREATE TABLE public."user"
 (
     id            uuid PRIMARY KEY DEFAULT public.uuid_generate_v1(),
     name          VARCHAR UNIQUE NOT NULL,
-    password_hash TEXT           NOT NULL,
-    salt          TEXT           NOT NULL
-
+    password_hash TEXT           NOT NULL
 );
 
 CREATE OR REPLACE FUNCTION set_password(username VARCHAR, password TEXT) RETURNS VOID AS $$
 DECLARE
-    s TEXT := gen_salt('bf');
+    salt TEXT := gen_salt('bf');
 BEGIN
+    PERFORM 1 FROM "user" WHERE name = username;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'User % does not exist', username;
+    END IF;
+
     UPDATE public."user"
-    SET password_hash = crypt(password, s),
-        salt = s
+    SET password_hash = crypt(password, salt)
     WHERE name = username;
 END;
 $$ LANGUAGE plpgsql;
