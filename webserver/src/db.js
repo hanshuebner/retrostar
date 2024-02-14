@@ -27,11 +27,11 @@ const middleware = async (ctx, next) => {
 
 const getConfigurationByInstallKey = async (client, installKey) => {
   const result = await client.query(
-    'SELECT configuration FROM openvpn_configuration WHERE install_key = $1',
+    'SELECT u.name, oc.port_number, oc.certificate, oc.private_key FROM openvpn_configuration oc JOIN "user" u ON u.id = oc.user_id WHERE install_key = $1',
     [installKey]
   )
 
-  return result.rows[0]?.configuration
+  return result.rows[0]
 }
 
 const getInstallKeyByUser = async (client, username) => {

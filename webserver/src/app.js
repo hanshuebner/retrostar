@@ -73,6 +73,9 @@ const isAuthenticated = async (ctx, next) => {
 
 app.use(db.middleware)
 
+const renderTemplate = (filename, data) =>
+  ejs.render(readFileSync('templates', filename), data)
+
 router.get('/client-config/:installKey', async (ctx) => {
   const installKey = ctx.params.installKey?.toUpperCase()
   const configuration = await db.getConfigurationByInstallKey(
@@ -82,7 +85,11 @@ router.get('/client-config/:installKey', async (ctx) => {
 
   if (configuration) {
     ctx.type = 'text/plain'
-    ctx.body = configuration
+    ctx.body = renderTemplate('client-config.ejs', {
+      ...configuration,
+      ca_certificate: readFileSync('../ca/data', 'ca.crt'),
+      ta_key: readFileSync('../ca/data', 'ta.key'),
+    })
   } else {
     ctx.status = 404
     ctx.body = 'Configuration not found'
@@ -99,22 +106,27 @@ router.get('/install-key', isAuthenticated, async (ctx) => {
   const username = ctx.state.user.username
   const installKey = await db.getInstallKeyByUser(ctx.db, username)
 
-  // Read the Markdown template file
-  const template = readFileSync('templates', 'install-key.md')
-
-  const expanded = ejs.render(template, {
-    data: {
-      username,
-      installKey,
-    },
-  })
-
-  // Convert Markdown to HTML with custom options
-  const html = marked.parse(expanded, markdownOptions)
+  const content = marked.parse(
+    renderTemplate('install-key.md', {
+      data: {
+        username,
+        installKey,
+      },
+    }),
+    markdownOptions
+  )
 
   // Send the HTML response
   ctx.type = 'html'
-  ctx.body = html
+  ctx.body = renderTemplate('layout.ejs', {
+    content,
+    page_name: 'RetroStar Installation',
+  })
+})
+
+router.get('/install.sh', (ctx) => {
+  ctx.type = 'text/plain'
+  ctx.body = renderTemplate('install.sh.ejs', {})
 })
 
 // Protected endpoint, requires authentication

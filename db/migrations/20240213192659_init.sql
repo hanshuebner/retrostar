@@ -1,9 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
-
-CREATE TABLE migrations
-(
-    filename VARCHAR UNIQUE
-);
+CREATE EXTENSION if NOT EXISTS "pgcrypto" WITH SCHEMA public;
 
 CREATE TABLE public."user"
 (
@@ -53,16 +49,31 @@ $$
     LANGUAGE plpgsql;
 
 
+CREATE SEQUENCE port_number_sequence START 1194;
 
 CREATE TABLE public.openvpn_configuration
 (
-    id            uuid PRIMARY KEY DEFAULT public.uuid_generate_v1(),
-    install_key   VARCHAR UNIQUE   DEFAULT generate_install_key(),
-    user_id       uuid REFERENCES "user" (id) NOT NULL,
-    configuration TEXT                        NOT NULL
+    id          uuid PRIMARY KEY                     DEFAULT public.uuid_generate_v1(),
+    install_key VARCHAR UNIQUE                       DEFAULT generate_install_key(),
+    user_id     uuid REFERENCES "user" (id) NOT NULL,
+    port_number INT                         NOT NULL DEFAULT NEXTVAL('port_number_sequence'),
+    certificate TEXT                        NOT NULL,
+    private_key TEXT                        NOT NULL,
+    hash        TEXT                        NOT NULL UNIQUE
 );
 
-CREATE OR REPLACE FUNCTION insert_openvpn_configuration(user_name VARCHAR, configuration TEXT)
+CREATE FUNCTION hash_certificate() RETURNS trigger AS $$
+BEGIN
+    NEW.hash := digest(NEW.certificate, 'sha256');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER hash_certificate_trigger
+    BEFORE INSERT OR UPDATE ON openvpn_configuration
+    FOR EACH ROW EXECUTE PROCEDURE hash_certificate();
+
+CREATE OR REPLACE FUNCTION insert_openvpn_configuration(user_name VARCHAR, certificate TEXT, private_key TEXT)
     RETURNS VOID AS
 $$
 DECLARE
@@ -77,7 +88,7 @@ BEGIN
     END IF;
 
     -- Insert the OpenVPN configuration
-    INSERT INTO openvpn_configuration (user_id, configuration) VALUES (user_id, configuration);
+    INSERT INTO openvpn_configuration (user_id, certificate, private_key) VALUES (user_id, certificate, private_key);
 
 END;
 $$ LANGUAGE plpgsql;

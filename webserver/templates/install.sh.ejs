@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+cd /tmp
+sudo apt update
+tmp_deb=./retrostar-client.$$.deb
+curl -L$tmp_deb https://retrostar.classic-computing.de/retrostar-client.deb
+sudo apt install -y $tmp_deb
+rm $tmp_deb

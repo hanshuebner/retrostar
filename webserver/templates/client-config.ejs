@@ -1,0 +1,23 @@
+client
+remote retrostar.classic-computing.de <%= port_number %>
+proto udp
+dev tap
+up "/etc/retrostar/if-up.sh"
+down "/etc/retrostar/if-down.sh"
+data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305
+cipher AES-256-GCM
+key-direction 1
+keepalive 5 15
+script-security 2
+<ca>
+<%= ca_certificate %>
+</ca>
+<cert>
+<%= certificate %>
+</cert>
+<key>
+<%= private_key %>
+</key>
+<tls-auth>
+<%= ta_key %>
+</tls-auth>

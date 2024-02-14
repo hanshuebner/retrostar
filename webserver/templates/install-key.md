@@ -1,29 +1,36 @@
-# RetroStar Zugang
-
 Hallo <%= data.username %>,
 
 <% if (data.installKey) { %>
 
-die Installation des RetroStar-Zugangs geht bequem mit dem Debian-Paket,
-das Du wie folgt installieren kannst:
+Für den Zugang zum RetroStar benötigst Du einen [Raspberry Pi](https://www.raspberrypi.org/products/) mit
+Ethernet und WLAN. Er muss über WLAN mit dem Internet verbunden sein.
+
+Die Installation des RetroStar-Zugangs geht bequem mit folgendem Befehl:
 
 ```shell
-sudo apt update
-curl -LO https://retrostar.classic-computing.de/retrostar-client-1.0.deb
-sudo apt install -y ./retrostar-client-1.0.deb
-rm ./retrostar-client-1.0.deb
+bash -c "$(curl -fsSL https://retrostar.classic-computing.de/install.sh)"
 ```
 
-Während der Installation wirst Du nach Deinem Installationsschlüssel gefragt,
-er lautet **<%= data.installKey %>**.
+Er führt ein [Shell-Skript](/install.sh) aus, das die notwendigen Installationsschritte
+durchführt.  Während der Installation wirst Du auch nach Deinem Kennwort gefragt.  Es
+ist notwendig, damit die Änderungen an der Systemkonfiguration durchgeführt werden können.
 
-Falls Du die Konfiguration lieber manuell durchführen möchtest, kannst Du Dir die
-OpenVPN-Konfigurationsdatei auch herunterladen.
+Weiterhin wirst Du nach Deinem Installationsschlüssel gefragt, er lautet `<%= data.installKey %>`
 
-[https://retrostar.classic-computing.de/client-config/<%= data.installKey %>.](/client-config/<%= data.installKey %>)
+Beachte, dass die automatisierte Installation die Netzwerkeinstellungen des Pi
+verändert. Insbesondere wird IPv6 abgeschaltet. Falls Du die Konfiguration lieber 
+manuell durchführen möchtest, kannst Du Dir die OpenVPN-Konfigurationsdatei auch
+herunterladen:
+
+[https://retrostar.classic-computing.de/client-config/<%= data.installKey %>](/client-config/<%= data.installKey %>)
+
+Bei der manuellen Konfiguration können wir Dir nur begrenzt helfen.
 
 Schau Dir den [Quellcode](https://github.com/hanshuebner/retrostar/tree/main/client-package) an,
 wenn Du wissen willst, wie RetroStar funktioniert.
+
+Bitte beachte, dass wir keine Haftung für Schäden übernehmen, die durch die Nutzung
+des RetroStar entstehen. Die Nutzung erfolgt auf eigene Gefahr.
 
 <% } else { %>
 

@@ -26,34 +26,6 @@ TA_KEY="$CA_DIR/ta.key"
 echo Generating key
 openssl req -new -newkey rsa:2048 -nodes -keyout "$OUTPUT_KEY" -out "$OUTPUT_CSR" -subj "/CN=$client_name"
 echo Generating cert
-openssl ca -config "$CA_CONF" -batch -in "$OUTPUT_CSR" -out "$OUTPUT_CERT"
-port=$(openssl x509 -in "$OUTPUT_CERT" -text -noout | perl -ne '/Serial Number: (\d+)/ && print $1')
-echo Allocated UDP port $port
-cat > "$OUTPUT_OVPN" <<EOF
-client
-remote retrostar.classic-computing.de $port
-proto udp
-dev tap
-up "/etc/retrostar/if-up.sh"
-down "/etc/retrostar/if-down.sh"
-data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305
-cipher AES-256-GCM
-key-direction 1
-keepalive 5 15
-script-security 2
-<ca>
-$(cat "$CA_CRT")
-</ca>
-<cert>
-$(cat "$OUTPUT_CERT")
-</cert>
-<key>
-$(cat "$OUTPUT_KEY")
-</key>
-<tls-auth>
-$(cat "$TA_KEY")
-</tls-auth>
-EOF
+openssl ca -config "$CA_CONF" -batch -in "$OUTPUT_CSR" -out "$OUTPUT_CERT" -notext
+./import-cert.sh "$client_name" "$OUTPUT_CERT" "$OUTPUT_KEY"
 rm "$OUTPUT_CSR"
-echo "$OUTPUT_OVPN" created
-./import-conf.sh "$client_name" "$OUTPUT_OVPN"
