@@ -54,3 +54,37 @@ body {
     margin: 0 auto;
     padding: 16px;
 }
+
+.menu {
+    list-style: none;
+    display: flex;
+    width: 100%;
+    background-color: #333;
+    font-size: 160%;
+}
+
+.menu li {
+    margin-right: 16px;
+}
+
+.menu a {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 16px;
+}
+
+.menu a:hover {
+    background-color: #555;
+}
+
+.active a {
+    border-bottom: 5px solid #d9c052;
+}
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}

@@ -102,26 +102,36 @@ const markdownOptions = {
   breaks: false,
 }
 
-router.get('/install-key', isAuthenticated, async (ctx) => {
+router.get('/installation', isAuthenticated, async (ctx, next) => {
   const username = ctx.state.user.username
   const installKey = await db.getInstallKeyByUser(ctx.db, username)
 
-  const content = marked.parse(
-    renderTemplate('install-key.md', {
-      data: {
-        username,
-        installKey,
-      },
-    }),
-    markdownOptions
-  )
+  ctx.template_data = {
+    username,
+    installKey,
+  }
 
-  // Send the HTML response
-  ctx.type = 'html'
-  ctx.body = renderTemplate('layout.ejs', {
-    content,
-    page_name: 'RetroStar Installation',
-  })
+  await next()
+})
+
+router.get('/:page', (ctx, next) => {
+  if (fs.existsSync(resolvePath('templates', `${ctx.params.page}.md`))) {
+    const content = marked.parse(
+      renderTemplate(`${ctx.params.page}.md`, {
+        data: ctx.template_data || {},
+      }),
+      markdownOptions
+    )
+
+    // Send the HTML response
+    ctx.type = 'html'
+    ctx.body = renderTemplate('layout.ejs', {
+      content,
+      page_name: ctx.params.page,
+    })
+  } else {
+    next()
+  }
 })
 
 router.get('/install.sh', (ctx) => {

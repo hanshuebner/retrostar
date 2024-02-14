@@ -9,7 +9,19 @@
 <body>
 
 <header>
-    <h1> <%= page_name %> </h1>
+    <nav>
+        <ul class="menu">
+            <li class="<%= page_name == 'news' ? 'active' : '' %>">
+                <a href="news">News</a>
+            </li>
+            <li class="<%= page_name == 'installation' ? 'active' : '' %>">
+                <a href="installation">Installation</a>
+            </li>
+            <li class="<%= page_name == 'status' ? 'active' : '' %>">
+                <a href="status">Status</a>
+            </li>
+        </ul>
+    </nav>
 </header>
 
 <main>
