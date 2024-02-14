@@ -20,7 +20,7 @@ er lautet **<%= data.installKey %>**.
 Falls Du die Konfiguration lieber manuell durchführen möchtest, kannst Du Dir die
 OpenVPN-Konfigurationsdatei auch herunterladen.
 
-https://retrostar.classic-computing.de/client-conf/<%= data.installKey %>.
+[https://retrostar.classic-computing.de/client-config/<%= data.installKey %>.](/client-config/<%= data.installKey %>)
 
 Schau Dir den [Quellcode](https://github.com/hanshuebner/retrostar/tree/main/client-package) an,
 wenn Du wissen willst, wie RetroStar funktioniert.

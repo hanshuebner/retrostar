@@ -5,18 +5,25 @@ const marked = require('marked')
 const ejs = require('ejs')
 const Koa = require('koa')
 const Router = require('koa-router')
-const static = require('koa-static')
+const koaStatic = require('koa-static')
 const session = require('koa-session')
 const passport = require('koa-passport')
 const GitHubStrategy = require('passport-github2').Strategy
-const allocateDbConnection = require('./db')
+const db = require('./db')
 
 const app = new Koa()
 const router = new Router()
+const path = require('path')
+
+const resolvePath = (...components) => path.join(__dirname, '..', ...components)
+
+const readFileSync = (...components) => {
+  const filename = resolvePath(...components)
+  return fs.readFileSync(filename, { encoding: 'utf8' })
+}
 
 // Serve static files
-app.use(static(__dirname + '/../public'))
-console.log('static files:', __dirname + '/../public')
+app.use(koaStatic(resolvePath('public')))
 
 // Session middleware
 app.keys = [process.env.SESSION_SECRET]
@@ -64,18 +71,18 @@ const isAuthenticated = async (ctx, next) => {
   }
 }
 
-app.use(allocateDbConnection)
+app.use(db.middleware)
 
 router.get('/client-config/:installKey', async (ctx) => {
   const installKey = ctx.params.installKey?.toUpperCase()
+  const configuration = await db.getConfigurationByInstallKey(
+    ctx.db,
+    installKey
+  )
 
-  const query =
-    'SELECT configuration FROM openvpn_configuration WHERE install_key = $1'
-  const result = await ctx.db.query(query, [installKey])
-
-  if (result.rows.length > 0) {
+  if (configuration) {
     ctx.type = 'text/plain'
-    ctx.body = result.rows[0].configuration
+    ctx.body = configuration
   } else {
     ctx.status = 404
     ctx.body = 'Configuration not found'
@@ -83,26 +90,22 @@ router.get('/client-config/:installKey', async (ctx) => {
 })
 
 const markdownOptions = {
-  // Add your custom options here
-  renderer: new marked.Renderer(), // Use the default renderer
-  gfm: true, // Enable GitHub Flavored Markdown
-  breaks: true, // Enable line breaks
-  // Add more options as needed
+  renderer: new marked.Renderer(),
+  gfm: true,
+  breaks: false,
 }
 
-router.get('/install-key', isAuthenticated, (ctx) => {
-  const username = ctx.state.user.username // Get the username from the authenticated user
+router.get('/install-key', isAuthenticated, async (ctx) => {
+  const username = ctx.state.user.username
+  const installKey = await db.getInstallKeyByUser(ctx.db, username)
 
   // Read the Markdown template file
-  const template = fs.readFileSync(
-    __dirname + '/../templates/install-key.md',
-    'utf8'
-  )
+  const template = readFileSync('templates', 'install-key.md')
 
   const expanded = ejs.render(template, {
     data: {
       username,
-      installKey: '0000-2222',
+      installKey,
     },
   })
 

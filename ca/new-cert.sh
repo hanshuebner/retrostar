@@ -23,12 +23,6 @@ CA_CRT="$CA_DIR/ca.crt"
 CA_SERIAL="$CA_DIR/serial"
 TA_KEY="$CA_DIR/ta.key"
 
-generate_random_string() {
-    tr -dc ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 < /dev/urandom | head -c $1
-}
-
-install_key="$(generate_random_string 4)-$(generate_random_string 4)"
-
 echo Generating key
 openssl req -new -newkey rsa:2048 -nodes -keyout "$OUTPUT_KEY" -out "$OUTPUT_CSR" -subj "/CN=$client_name"
 echo Generating cert
@@ -62,6 +56,4 @@ $(cat "$TA_KEY")
 EOF
 rm "$OUTPUT_CSR"
 echo "$OUTPUT_OVPN" created
-config_content=$(<$OUTPUT_OVPN)
-config_content_escaped=$(printf '%s' "$config_content" | sed "s/'/''/g")
-psql -d retrostar -c "SELECT insert_openvpn_configuration('bla', E'$config_content_escaped');"
+./import-conf.sh "$client_name" "$OUTPUT_OVPN"
