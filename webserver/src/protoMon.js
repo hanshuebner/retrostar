@@ -44,10 +44,9 @@ const protoMon = async () => {
       .trim()
       .split(/\r?\n/)
       .forEach((line) => {
-        const [match, mac_address, protocol] = line.match(
-          / (.*) > .*, ethertype .*? \(0x(....)\)/
-        )
+        const match = line?.match(/ (.*) > .*, ethertype .*? \(0x(....)\)/)
         if (match) {
+          const [_, mac_address, protocol] = match
           console.log(`${mac_address} -> ${protocol}`)
           handlePacket(hosts, mac_address, protocol)
         } else {
