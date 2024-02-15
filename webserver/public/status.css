@@ -6,3 +6,12 @@ th, td {
     padding: 10px;
     border: 1px solid black;
 }
+
+.protocol {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 10px; /* Adjust the value to change the roundness of the corners */
+    background-color: #e0e0e0; /* Background color of the chip */
+    color: #333; /* Text color */
+    font-family: Arial, sans-serif; /* Font family */
+}
