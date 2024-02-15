@@ -78,7 +78,8 @@ const getHosts = async () => {
     `SELECT h.*, u.name AS owner
      FROM host h
               JOIN "user" u ON u.id = h.user_id
-     WHERE h.last_seen > NOW() - INTERVAL \'1 minute\'`
+     WHERE h.last_seen > NOW() - INTERVAL \'1 minute\'
+     ORDER BY u.name, h.mac_address::varchar`
   )
   client.end()
   return result.rows
@@ -107,4 +108,5 @@ module.exports = {
   checkPassword,
   touchHosts,
   getHosts,
+  updateHost,
 }

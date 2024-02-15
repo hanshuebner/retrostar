@@ -1,18 +1,14 @@
-function sendData(element, macAddress) {
-  const newValue = element.textContent
-  const url = 'http://your-server-url.com/update'
-  const data = { mac_address: macAddress, name: newValue }
-
-  fetch(url, {
-    method: 'POST',
+const sendData = async (element, macAddress) => {
+  const response = await fetch(`/api/host/${macAddress}`, {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ name: element.textContent }),
   })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log('Success:', data)
-    })
-    .catch((error) => {
-      console.error('Error:', error)
-    })
+}
+
+const handleKeyDown = async (event, element, macAddress) => {
+  if (event.key === 'Enter' || event.keyCode === 13) {
+    event.preventDefault()
+    sendData(element, macAddress)
+  }
 }

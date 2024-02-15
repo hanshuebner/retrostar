@@ -3,18 +3,6 @@ const loadTapMap = require('./loadTapMap')
 const db = require('./db')
 const exec = util.promisify(require('child_process').exec)
 
-// Some js developers would argue that extending the prototype of builtin objects is a bad practice because it can
-// lead to conflicts with other libraries that may use the same name for their // purposes.
-
-Array.prototype.groupBy = function (key) {
-  return this.reduce((result, currentItem) => {
-    ;(result[currentItem[key]] = result[currentItem[key]] || []).push(
-      currentItem
-    )
-    return result
-  }, {})
-}
-
 const getBridgeNodes = async () => {
   const { stdout } = await exec('bridge fdb show')
   return stdout

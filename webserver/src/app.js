@@ -17,6 +17,7 @@ const app = new Koa()
 const router = new Router()
 const path = require('path')
 const Ajv = require('ajv')
+const ethernetToDecnet = require('./ethernetToDecnet')
 
 const resolvePath = (...components) => path.join(__dirname, '..', ...components)
 
@@ -137,7 +138,10 @@ router.get('/installation', isAuthenticated, async (ctx, next) => {
 })
 
 router.get('/status', async (ctx, next) => {
-  ctx.state.hosts = await db.getHosts()
+  ctx.state.hosts = (await db.getHosts()).map((host) => ({
+    ...host,
+    decnet: ethernetToDecnet(host.mac_address),
+  }))
 
   await next()
 })
@@ -180,7 +184,6 @@ router.get('/install.sh', (ctx) => {
 // host maintenance
 
 router.get('/api/hosts', async (ctx) => {
-  // Implement getHosts to retrieve the hosts list from your database
   ctx.body = await db.getHosts()
 })
 
@@ -193,18 +196,18 @@ const validateHostUpdateSchema = new Ajv().compile({
   additionalProperties: false,
 })
 
-router.put('/api/host/:macaddress', isAuthenticated, async (ctx) => {
+router.put('/api/host/:mac_address', isAuthenticated, async (ctx) => {
   const valid = validateHostUpdateSchema(ctx.request.body)
 
   if (!valid) {
     ctx.status = 400
-    ctx.body = validate.errorsredirec
+    ctx.body = validate.errors
     return
   }
 
   await db.updateHost(
-    ctx.user.username,
-    ctx.params.macaddress,
+    ctx.state.user.username,
+    ctx.params.mac_address,
     ctx.request.body.name,
     ctx.request.body.description
   )
@@ -264,11 +267,6 @@ app.use(router.allowedMethods())
 
 // Start the server
 const port = process.env.PORT || 3000
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`)
-})
+app.listen(port, () => console.log(`Server running on port ${port}`))
 
-setInterval(async () => {
-  await bridgeInfo.updateHosts()
-  console.log('updated hosts database')
-}, 5000)
+setInterval(bridgeInfo.updateHosts, 5000)

@@ -4,6 +4,7 @@
   <tr>
     <th>Mac Address</th>
     <th>Owner</th>
+    <th>DECNET</th>
     <th>Name</th>
     <th>Protocols</th>
   </tr>
@@ -13,7 +14,12 @@
     <tr>
       <td><%= host.mac_address %></td>
       <td><%= host.owner %></td>
-      <td contenteditable="true" onBlur="sendData(this, '<%= host.mac_address %>')"><%= host.name %></td>
+      <td><%= host.decnet %></td>
+      <td contenteditable="true"
+          onBlur="sendData(this, '<%= host.mac_address %>')"
+          onkeydown="handleKeyDown(event, this, '<%= host.mac_address %>')">
+        <%= host.name %>
+      </td>
       <td><%= host.protocols %></td>
     </tr>
   <% } %>
