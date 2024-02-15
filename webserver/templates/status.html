@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="status.css">
+<table>
+  <thead>
+  <tr>
+    <th>Mac Address</th>
+    <th>Owner</th>
+    <th>Name</th>
+    <th>Protocols</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% for (let i = 0; i < hosts.length; i++) { const host = hosts[i] %>
+    <tr>
+      <td><%= host.mac_address %></td>
+      <td><%= host.owner %></td>
+      <td contenteditable="true" onBlur="sendData(this, '<%= host.mac_address %>')"><%= host.name %></td>
+      <td><%= host.protocols %></td>
+    </tr>
+  <% } %>
+  </tbody>
+</table>
+<script src="status.js"></script>

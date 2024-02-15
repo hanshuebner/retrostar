@@ -8,7 +8,8 @@ CREATE TABLE public."user"
     password_hash TEXT
 );
 
-CREATE OR REPLACE FUNCTION set_password(username VARCHAR, password TEXT) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION set_password(username VARCHAR, password TEXT) RETURNS VOID AS
+$$
 DECLARE
     salt TEXT := gen_salt('bf');
 BEGIN
@@ -23,11 +24,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION check_password(username VARCHAR, password TEXT) RETURNS BOOLEAN AS $$
+CREATE OR REPLACE FUNCTION check_password(username VARCHAR, password TEXT) RETURNS BOOLEAN AS
+$$
 DECLARE
     hashed_password TEXT;
 BEGIN
-    SELECT password_hash INTO hashed_password
+    SELECT password_hash
+    INTO hashed_password
     FROM public."user"
     WHERE name = username;
 
@@ -122,4 +125,39 @@ BEGIN
     INSERT INTO openvpn_configuration (user_id, certificate, private_key) VALUES (user_id, certificate, private_key);
 
 END;
+$$ LANGUAGE plpgsql;
+
+CREATE TABLE public.host
+(
+    mac_address MACADDR PRIMARY KEY,
+    created     TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    last_seen   TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    user_id     uuid REFERENCES "user" (id) NOT NULL,
+    name        VARCHAR,
+    description TEXT
+);
+
+CREATE OR REPLACE FUNCTION update_host(username varchar, mac text)
+    RETURNS VOID AS
+$$
+DECLARE
+    user_id uuid;
+BEGIN
+    -- Check if host exists
+    IF EXISTS (SELECT 1 FROM host WHERE mac_address = mac::macaddr) THEN
+        -- Update last_seen to current timestamp
+        UPDATE host SET last_seen = NOW() WHERE mac_address = mac::macaddr;
+    ELSE
+        -- Get the user id
+        SELECT id INTO user_id FROM "user" WHERE name = username;
+
+        -- Check if user exists
+        IF user_id IS NULL THEN
+            RAISE 'User % not found', username;
+        END IF;
+
+        -- Create a new host
+        INSERT INTO host(user_id, mac_address, last_seen) VALUES (user_id, mac::macaddr, NOW());
+    END IF;
+END
 $$ LANGUAGE plpgsql;

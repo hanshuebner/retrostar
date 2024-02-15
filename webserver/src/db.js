@@ -64,9 +64,47 @@ const checkPassword = async (username, password) => {
   return user.rows[0]
 }
 
+const touchHosts = async (usersAndHosts) => {
+  const db = makePool()
+  usersAndHosts.forEach(([username, hostname]) =>
+    db.query('SELECT update_host($1, $2)', [username, hostname])
+  )
+  db.end()
+}
+
+const getHosts = async () => {
+  const client = makePool()
+  const result = await client.query(
+    `SELECT h.*, u.name AS owner
+     FROM host h
+              JOIN "user" u ON u.id = h.user_id
+     WHERE h.last_seen > NOW() - INTERVAL \'1 minute\'`
+  )
+  client.end()
+  return result.rows
+}
+
+const updateHost = async (username, macAddress, hostname, description) => {
+  const client = makePool()
+  const result = await client.query(
+    `UPDATE host
+     SET name        = $1,
+         description = $2
+     WHERE mac_address = $3
+       AND user_id = (SELECT id
+                      FROM "user"
+                      WHERE name = $4);`,
+    [hostname, description, macAddress, username]
+  )
+  client.end()
+  return result.rows
+}
+
 module.exports = {
   middleware,
   getConfigurationByInstallKey,
   getInstallKeyByUser,
   checkPassword,
+  touchHosts,
+  getHosts,
 }

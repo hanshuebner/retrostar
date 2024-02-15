@@ -11,10 +11,12 @@ const session = require('koa-session')
 const passport = require('koa-passport')
 const GitHubStrategy = require('passport-github2').Strategy
 const db = require('./db')
+const bridgeInfo = require('./bridgeInfo')
 
 const app = new Koa()
 const router = new Router()
 const path = require('path')
+const Ajv = require('ajv')
 
 const resolvePath = (...components) => path.join(__dirname, '..', ...components)
 
@@ -95,8 +97,10 @@ const isAuthenticated = async (ctx, next) => {
 
 app.use(db.middleware)
 
-const renderTemplate = (filename, state, data) =>
-  ejs.render(readFileSync('templates', filename), { ...state, ...(data || {}) })
+const renderTemplate = (content, state, data) =>
+  ejs.render(content, { ...state, ...(data || {}) })
+const renderTemplateFile = (filename, state, data) =>
+  renderTemplate(readFileSync('templates', filename), state, data)
 
 router.get('/client-config/:installKey', async (ctx) => {
   const installKey = ctx.params.installKey?.toUpperCase()
@@ -107,7 +111,7 @@ router.get('/client-config/:installKey', async (ctx) => {
 
   if (configuration) {
     ctx.type = 'text/plain'
-    ctx.body = renderTemplate('client-config.ejs', ctx.state, {
+    ctx.body = renderTemplateFile('client-config.ejs', ctx.state, {
       ...configuration,
       ca_certificate: readFileSync('../ca/data', 'ca.crt'),
       ta_key: readFileSync('../ca/data', 'ta.key'),
@@ -132,23 +136,32 @@ router.get('/installation', isAuthenticated, async (ctx, next) => {
   await next()
 })
 
+router.get('/status', async (ctx, next) => {
+  ctx.state.hosts = await db.getHosts()
+
+  await next()
+})
+
 router.get('/:page', (ctx, next) => {
   let content = null
   if (fs.existsSync(resolvePath('templates', `${ctx.params.page}.md`))) {
     content = marked.parse(
-      renderTemplate(`${ctx.params.page}.md`, ctx.state),
+      renderTemplateFile(`${ctx.params.page}.md`, ctx.state),
       markdownOptions
     )
   } else if (
     fs.existsSync(resolvePath('templates', `${ctx.params.page}.html`))
   ) {
-    content = readFileSync('templates', `${ctx.params.page}.html`)
+    content = renderTemplate(
+      readFileSync('templates', `${ctx.params.page}.html`),
+      ctx.state
+    )
   }
 
   if (content) {
     // Send the HTML response
     ctx.type = 'text/html'
-    ctx.body = renderTemplate('layout.ejs', ctx.state, {
+    ctx.body = renderTemplateFile('layout.ejs', ctx.state, {
       content,
       page_name: ctx.params.page,
     })
@@ -161,7 +174,42 @@ router.redirect('/', '/news')
 
 router.get('/install.sh', (ctx) => {
   ctx.type = 'text/plain'
-  ctx.body = renderTemplate('install.sh.ejs', ctx.state)
+  ctx.body = renderTemplateFile('install.sh.ejs', ctx.state)
+})
+
+// host maintenance
+
+router.get('/api/hosts', async (ctx) => {
+  // Implement getHosts to retrieve the hosts list from your database
+  ctx.body = await db.getHosts()
+})
+
+const validateHostUpdateSchema = new Ajv().compile({
+  type: 'object',
+  properties: {
+    name: { type: 'string' },
+    description: { type: 'string' },
+  },
+  additionalProperties: false,
+})
+
+router.put('/api/host/:macaddress', isAuthenticated, async (ctx) => {
+  const valid = validateHostUpdateSchema(ctx.request.body)
+
+  if (!valid) {
+    ctx.status = 400
+    ctx.body = validate.errorsredirec
+    return
+  }
+
+  await db.updateHost(
+    ctx.user.username,
+    ctx.params.macaddress,
+    ctx.request.body.name,
+    ctx.request.body.description
+  )
+
+  ctx.status = 204
 })
 
 // GitHub authentication route
@@ -219,3 +267,8 @@ const port = process.env.PORT || 3000
 app.listen(port, () => {
   console.log(`Server running on port ${port}`)
 })
+
+setInterval(async () => {
+  await bridgeInfo.updateHosts()
+  console.log('updated hosts database')
+}, 5000)
