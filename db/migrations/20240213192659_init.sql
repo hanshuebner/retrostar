@@ -5,7 +5,7 @@ CREATE TABLE public."user"
 (
     id            uuid PRIMARY KEY DEFAULT public.uuid_generate_v1(),
     name          VARCHAR UNIQUE NOT NULL,
-    password_hash TEXT           NOT NULL
+    password_hash TEXT
 );
 
 CREATE OR REPLACE FUNCTION set_password(username VARCHAR, password TEXT) RETURNS VOID AS $$

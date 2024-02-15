@@ -191,7 +191,7 @@ router.post('/auth/login', async (ctx, next) => {
         ctx.body = 'Internal Server Error'
       } else if (!user) {
         if (ctx.accepts('html')) {
-          ctx.redirect('/login?error=1')
+          ctx.redirect('/login?error=1&path=' + (ctx.request.query.path || '/'))
           // await passport.authenticate('github')(ctx, next)
         } else {
           ctx.status = 403
