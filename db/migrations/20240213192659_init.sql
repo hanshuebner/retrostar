@@ -134,7 +134,8 @@ CREATE TABLE public.host
     last_seen   TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
     user_id     uuid REFERENCES "user" (id) NOT NULL,
     name        VARCHAR,
-    description TEXT
+    description TEXT,
+    protocols   INTEGER[]
 );
 
 CREATE OR REPLACE FUNCTION update_host(username varchar, mac text)
@@ -161,3 +162,10 @@ BEGIN
     END IF;
 END
 $$ LANGUAGE plpgsql;
+
+CREATE TABLE protocol
+(
+    number      INTEGER PRIMARY KEY,
+    name        VARCHAR UNIQUE,
+    description TEXT NOT NULL
+)

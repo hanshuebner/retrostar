@@ -2,7 +2,7 @@ const sendData = async (element, macAddress) => {
   const response = await fetch(`/api/host/${macAddress}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: element.textContent }),
+    body: JSON.stringify({ name: element.textContent.trim() }),
   })
 }
 

@@ -138,7 +138,8 @@ router.get('/installation', isAuthenticated, async (ctx, next) => {
 })
 
 router.get('/status', async (ctx, next) => {
-  ctx.state.hosts = (await db.getHosts()).map((host) => ({
+  ctx.state.protocols = await db.getProtocols()
+  ctx.state.hosts = (await db.getActiveHosts()).map((host) => ({
     ...host,
     decnet: ethernetToDecnet(host.mac_address),
   }))
@@ -184,7 +185,7 @@ router.get('/install.sh', (ctx) => {
 // host maintenance
 
 router.get('/api/hosts', async (ctx) => {
-  ctx.body = await db.getHosts()
+  ctx.body = await db.getActiveHosts()
 })
 
 const validateHostUpdateSchema = new Ajv().compile({

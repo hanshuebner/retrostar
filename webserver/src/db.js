@@ -72,13 +72,25 @@ const touchHosts = async (usersAndHosts) => {
   db.end()
 }
 
-const getHosts = async () => {
+const getActiveHosts = async () => {
   const client = makePool()
   const result = await client.query(
     `SELECT h.*, u.name AS owner
      FROM host h
               JOIN "user" u ON u.id = h.user_id
      WHERE h.last_seen > NOW() - INTERVAL \'1 minute\'
+     ORDER BY u.name, h.mac_address::varchar`
+  )
+  client.end()
+  return result.rows
+}
+
+const getAllHosts = async () => {
+  const client = makePool()
+  const result = await client.query(
+    `SELECT h.*, u.name AS owner
+     FROM host h
+              JOIN "user" u ON u.id = h.user_id
      ORDER BY u.name, h.mac_address::varchar`
   )
   client.end()
@@ -101,12 +113,43 @@ const updateHost = async (username, macAddress, hostname, description) => {
   return result.rows
 }
 
+const updateHostProtocols = async (macAddress, protocols) => {
+  const client = makePool()
+  const result = await client.query(
+    `UPDATE host
+     SET protocols = $2
+     WHERE mac_address = $1`,
+    [macAddress, protocols]
+  )
+  client.end()
+  return result.rows
+}
+
+const getProtocols = async () => {
+  const client = makePool()
+  const result = await client.query(
+    `SELECT *
+     FROM protocol`
+  )
+  client.end()
+  return result.rows.reduce((protocols, { number, name, description }) => {
+    protocols[number] = {
+      name: name || number.toString(16).toUpperCase(),
+      description,
+    }
+    return protocols
+  }, {})
+}
+
 module.exports = {
   middleware,
   getConfigurationByInstallKey,
   getInstallKeyByUser,
   checkPassword,
   touchHosts,
-  getHosts,
+  getAllHosts,
+  getActiveHosts,
   updateHost,
+  updateHostProtocols,
+  getProtocols,
 }
