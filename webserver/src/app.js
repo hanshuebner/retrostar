@@ -147,6 +147,13 @@ router.get('/status', async (ctx, next) => {
   await next()
 })
 
+router.get('/set-password', async (ctx, next) => {
+  const key = ctx.request.query.key
+  ctx.state.keyValid = await db.checkPasswordResetKey(key)
+  ctx.state.key = key
+  next()
+})
+
 router.get('/:page', (ctx, next) => {
   let content = null
   if (fs.existsSync(resolvePath('templates', `${ctx.params.page}.md`))) {
@@ -258,6 +265,11 @@ router.post('/auth/login', async (ctx, next) => {
     // If username or password is missing, attempt GitHub authentication
     await passport.authenticate('github')(ctx, next)
   }
+})
+
+router.post('/auth/set-password', async (ctx, next) => {
+  await db.resetPassword(ctx.request.body.key, ctx.request.body.password)
+  ctx.redirect('/login')
 })
 
 // Logout route

@@ -11,23 +11,27 @@ const makePool = () =>
   })
 
 // Middleware function to allocate PostgreSQL database connection and manage transactions
-const middleware = async (ctx, next) => {
+const withClient = async (handler) => {
   const client = makePool()
-
+  let result = null
   try {
     await client.query('BEGIN')
-    ctx.db = client
-    await next()
+    result = await handler(client)
     await client.query('COMMIT')
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error('Error in transaction:', error)
-    ctx.status = 500
-    ctx.body = 'Internal Server Error'
+    throw error
   } finally {
     await client.end()
   }
+  return result
 }
+
+const middleware = async (ctx, next) =>
+  withClient(async (client) => {
+    ctx.db = client
+    await next()
+  })
 
 const getConfigurationByInstallKey = async (client, installKey) => {
   const result = await client.query(
@@ -47,105 +51,128 @@ const getInstallKeyByUser = async (client, username) => {
   return result.rows[0]?.install_key
 }
 
-const checkPassword = async (username, password) => {
-  const client = makePool()
-  const result = await client.query('SELECT check_password($1, $2)', [
-    username,
-    password,
-  ])
-  if (!result.rows[0].check_password) {
-    return null
-  }
-  const user = await client.query(
-    'SELECT id, name AS username FROM "user" WHERE name = $1',
-    [username]
-  )
-  client.end()
-  return user.rows[0]
-}
-
-const touchHosts = async (usersAndHosts) => {
-  const db = makePool()
-  usersAndHosts.forEach(([username, hostname]) =>
-    db.query('SELECT update_host($1, $2)', [username, hostname])
-  )
-  db.end()
-}
-
-const getActiveHosts = async () => {
-  const client = makePool()
-  const result = await client.query(
-    `SELECT h.*, u.name AS owner
-     FROM host h
-              JOIN "user" u ON u.id = h.user_id
-     WHERE h.last_seen > NOW() - INTERVAL \'1 minute\'
-     ORDER BY u.name, h.mac_address::varchar`
-  )
-  client.end()
-  return result.rows
-}
-
-const getAllHosts = async () => {
-  const client = makePool()
-  const result = await client.query(
-    `SELECT h.*, u.name AS owner
-     FROM host h
-              JOIN "user" u ON u.id = h.user_id
-     ORDER BY u.name, h.mac_address::varchar`
-  )
-  client.end()
-  return result.rows
-}
-
-const updateHost = async (username, macAddress, hostname, description) => {
-  const client = makePool()
-  const result = await client.query(
-    `UPDATE host
-     SET name        = $1,
-         description = $2
-     WHERE mac_address = $3
-       AND user_id = (SELECT id
-                      FROM "user"
-                      WHERE name = $4);`,
-    [hostname, description, macAddress, username]
-  )
-  client.end()
-  return result.rows
-}
-
-const updateHostProtocols = async (macAddress, protocols) => {
-  const client = makePool()
-  const result = await client.query(
-    `UPDATE host
-     SET protocols = $2
-     WHERE mac_address = $1`,
-    [macAddress, protocols]
-  )
-  client.end()
-  return result.rows
-}
-
-const getProtocols = async () => {
-  const client = makePool()
-  const result = await client.query(
-    `SELECT *
-     FROM protocol`
-  )
-  client.end()
-  return result.rows.reduce((protocols, { number, name, description }) => {
-    protocols[number] = {
-      name: name || number.toString(16).toUpperCase(),
-      description,
+const checkPassword = async (username, password) =>
+  withClient(async (client) => {
+    const result = await client.query('SELECT check_password($1, $2)', [
+      username,
+      password,
+    ])
+    if (!result.rows[0].check_password) {
+      return null
     }
-    return protocols
-  }, {})
-}
+    const user = await client.query(
+      'SELECT id, name AS username FROM "user" WHERE name = $1',
+      [username]
+    )
+    return user.rows[0]
+  })
+
+const checkPasswordResetKey = async (key) =>
+  withClient(async (client) => {
+    const result = await client.query(
+      `SELECT password_reset_key_expires_at < NOW() as expired, now(), password_reset_key_expires_at
+       FROM "user"
+       WHERE password_reset_key = $1`,
+      [key]
+    )
+    if (result.rows.length === 0) {
+      console.log('invalid password reset key:', key)
+      return false
+    } else if (result.rows[0].expired) {
+      console.log('expired password reset key:', result.rows[0])
+      return false
+    } else {
+      return true
+    }
+  })
+
+const resetPassword = async (key, password) =>
+  withClient(async (client) => {
+    const result = await client.query(
+      `SELECT reset_password_with_key($1, $2)`,
+      [key, password]
+    )
+    return result.rows[0].reset_password
+  })
+
+const touchHosts = async (usersAndHosts) =>
+  withClient(async (client) =>
+    usersAndHosts.forEach(([username, hostname]) =>
+      client.query('SELECT update_host($1, $2)', [username, hostname])
+    )
+  )
+
+const getActiveHosts = async () =>
+  withClient(async (client) => {
+    const result = await client.query(
+      `SELECT h.*, u.name AS owner
+       FROM host h
+                JOIN "user" u ON u.id = h.user_id
+       WHERE h.last_seen > NOW() - INTERVAL \'1 minute\'
+       ORDER BY u.name, h.mac_address::varchar`
+    )
+    return result.rows
+  })
+
+const getAllHosts = async () =>
+  withClient(async (client) => {
+    const result = await client.query(
+      `SELECT h.*, u.name AS owner
+       FROM host h
+                JOIN "user" u ON u.id = h.user_id
+       ORDER BY u.name, h.mac_address::varchar`
+    )
+    return result.rows
+  })
+
+const updateHost = async (username, macAddress, hostname, description) =>
+  withClient(async (client) => {
+    const result = await client.query(
+      `UPDATE host
+       SET name        = $1,
+           description = $2
+       WHERE mac_address = $3
+         AND user_id = (SELECT id
+                        FROM "user"
+                        WHERE name = $4);`,
+      [hostname, description, macAddress, username]
+    )
+    return result.rows
+  })
+
+const updateHostProtocols = async (macAddress, protocols) =>
+  withClient(async (client) => {
+    const result = await client.query(
+      `UPDATE host
+       SET protocols = $2
+       WHERE mac_address = $1`,
+      [macAddress, protocols]
+    )
+    return result.rows
+  })
+
+const getProtocols = async () =>
+  withClient(async function (client) {
+    const result = await client.query(
+      `SELECT *
+       FROM protocol`
+    )
+    return result.rows.reduce((protocols, { number, name, description }) => {
+      protocols[number] = {
+        name: name || number.toString(16).toUpperCase(),
+        description,
+      }
+      return protocols
+    }, {})
+  })
 
 module.exports = {
   middleware,
   getConfigurationByInstallKey,
   getInstallKeyByUser,
   checkPassword,
+  checkPasswordResetKey,
+  resetPassword,
   touchHosts,
   getAllHosts,
   getActiveHosts,
