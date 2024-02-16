@@ -11,7 +11,11 @@ fi
 
 username=$1
 
+SCRIPT_DIR=$(dirname "$0")
+cd "$SCRIPT_DIR"
+
 # Create user
 psql -tA -c 'INSERT INTO "user" (name) VALUES ('"'$username'"')'
 ./ca/new-cert.sh $username
+./start-openvpn-servers.sh
 psql -tA -c "SELECT 'https://retrostar.classic-computing.de/set-password?key=' || request_password_reset('$username');"

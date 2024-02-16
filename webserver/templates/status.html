@@ -20,7 +20,7 @@
           onkeydown="handleKeyDown(event, this, '<%= host.mac_address %>')">
         <%= host.name %>
       </td>
-      <td><%- host.protocols?.sort().map(number => `<span title="${protocols[number]?.description}" class="protocol">${protocols[number]?.name}</span>`).join(' ') %></td>
+      <td><%- host.protocols?.sort().map(number => `<span title="${protocols[number]?.description}" class="protocol">${protocols[number]?.name || number.toString(16).toUppercase()}</span>`).join(' ') %></td>
     </tr>
   <% } %>
   </tbody>
