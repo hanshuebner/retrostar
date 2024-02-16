@@ -10,6 +10,9 @@ fi
 
 client_name=$1
 
+SCRIPT_DIR=$(dirname "$0")
+cd "$SCRIPT_DIR"
+
 trap "rm -f $client_name.*" ERR
 
 CA_DIR="data"
