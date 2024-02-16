@@ -18,4 +18,13 @@ cd "$SCRIPT_DIR"
 psql -tA -c 'INSERT INTO "user" (name) VALUES ('"'$username'"')'
 ./ca/new-cert.sh $username
 ./start-openvpn-servers.sh
-psql -tA -c "SELECT 'https://retrostar.classic-computing.de/set-password?key=' || request_password_reset('$username');"
+key=$(psql -tA -c "SELECT '' || request_password_reset('$username');")
+cat <<EOF
+
+Dein RetroStar-Account wurde eingerichtet.
+
+Dein Benutzername ist $username (Kleinbuchstaben)
+
+Besuche diesen Link, um Dein Kennwort zu setzen: https://retrostar.classic-computing.de/set-password?key=$key
+
+EOF

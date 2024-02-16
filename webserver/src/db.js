@@ -117,7 +117,7 @@ const getActiveHosts = async () =>
       `SELECT h.*, u.name AS owner
        FROM host h
                 JOIN "user" u ON u.id = h.user_id
-       WHERE h.last_seen > NOW() - INTERVAL \'1 minute\'
+       WHERE h.last_seen > NOW() - INTERVAL \'5 minutes\' AND h.protocols IS NOT NULL
        ORDER BY u.name, h.mac_address::VARCHAR`
     )
     return result.rows

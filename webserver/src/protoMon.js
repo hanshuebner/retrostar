@@ -22,6 +22,7 @@ const handlePacket = async (hosts, mac_address, protocol) => {
   } else {
     console.log(`Unknown MAC address: ${mac_address}`)
   }
+  return hosts
 }
 
 const protoMon = async () => {
@@ -35,7 +36,7 @@ const protoMon = async () => {
     '14',
   ])
 
-  const hosts = await loadHostProtocols()
+  let hosts = await loadHostProtocols()
   console.log('hosts:', hosts)
 
   tcpdumpProcess.stdout.on('data', (data) =>
@@ -48,7 +49,7 @@ const protoMon = async () => {
         if (match) {
           const [_, mac_address, protocol] = match
           console.log(`${mac_address} -> ${protocol}`)
-          handlePacket(hosts, mac_address, protocol)
+          handlePacket(hosts, mac_address, protocol).then((newHosts) => hosts = newHosts)
         } else {
           console.log(`Received line: ${line}`)
         }

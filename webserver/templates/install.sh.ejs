@@ -6,5 +6,5 @@ cd /tmp
 sudo apt update
 tmp_deb=./retrostar-client.$$.deb
 curl -Lo$tmp_deb https://retrostar.classic-computing.de/retrostar-client.deb
-sudo apt install -y $tmp_deb
+sudo apt install -y --reinstall $tmp_deb
 rm $tmp_deb
