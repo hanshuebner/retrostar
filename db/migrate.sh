@@ -70,11 +70,10 @@ function dump_schema() {
 }
 
 function reset_db() {
-    set +e
-    dropdb $PGDATABASE
     set -e
-    createdb $PGDATABASE
     psql <<< "
+    drop schema public cascade;
+    create schema public;
     create table public.migrations (filename varchar primary key);
     "
 }

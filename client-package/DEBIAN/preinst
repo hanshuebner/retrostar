@@ -129,7 +129,7 @@ while true; do
         continue
     fi
     mkdir -p /etc/retrostar
-    if curl --silent --fail -Lo /etc/retrostar/openvpn.conf https://retrostar.classic-computing.de/client-conf/"$token"
+    if curl --silent --fail -Lo /etc/retrostar/openvpn.conf https://retrostar.classic-computing.de/client-config/"$token"
     then
         break
     else
