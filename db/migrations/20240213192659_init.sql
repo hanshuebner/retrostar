@@ -218,4 +218,4 @@ CREATE TABLE protocol
     number      INTEGER PRIMARY KEY,
     name        VARCHAR UNIQUE,
     description TEXT NOT NULL
-)
+);

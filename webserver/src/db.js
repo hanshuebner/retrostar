@@ -70,7 +70,7 @@ const checkPassword = async (username, password) =>
 const checkPasswordResetKey = async (key) =>
   withClient(async (client) => {
     const result = await client.query(
-      `SELECT password_reset_key_expires_at < NOW() as expired, now(), password_reset_key_expires_at
+      `SELECT password_reset_key_expires_at < NOW() AS expired, NOW(), password_reset_key_expires_at
        FROM "user"
        WHERE password_reset_key = $1`,
       [key]
@@ -92,7 +92,16 @@ const resetPassword = async (key, password) =>
       `SELECT reset_password_with_key($1, $2)`,
       [key, password]
     )
-    return result.rows[0].reset_password
+    return result.rows.length > 0
+  })
+
+const setPassword = async (username, password) =>
+  withClient(async (client) => {
+    const result = await client.query(`SELECT set_password($1, $2)`, [
+      username,
+      password,
+    ])
+    return result.rows.length > 0
   })
 
 const touchHosts = async (usersAndHosts) =>
@@ -109,7 +118,7 @@ const getActiveHosts = async () =>
        FROM host h
                 JOIN "user" u ON u.id = h.user_id
        WHERE h.last_seen > NOW() - INTERVAL \'1 minute\'
-       ORDER BY u.name, h.mac_address::varchar`
+       ORDER BY u.name, h.mac_address::VARCHAR`
     )
     return result.rows
   })
@@ -120,7 +129,7 @@ const getAllHosts = async () =>
       `SELECT h.*, u.name AS owner
        FROM host h
                 JOIN "user" u ON u.id = h.user_id
-       ORDER BY u.name, h.mac_address::varchar`
+       ORDER BY u.name, h.mac_address::VARCHAR`
     )
     return result.rows
   })
@@ -173,6 +182,7 @@ module.exports = {
   checkPassword,
   checkPasswordResetKey,
   resetPassword,
+  setPassword,
   touchHosts,
   getAllHosts,
   getActiveHosts,

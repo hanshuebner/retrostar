@@ -14,4 +14,4 @@ const loadTapMap = () => {
   return tapMap
 }
 
-module.exports = loadTapMap
+module.exports = { loadTapMap, directory }

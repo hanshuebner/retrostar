@@ -149,8 +149,13 @@ router.get('/status', async (ctx, next) => {
 
 router.get('/set-password', async (ctx, next) => {
   const key = ctx.request.query.key
-  ctx.state.keyValid = await db.checkPasswordResetKey(key)
-  ctx.state.key = key
+  if (key) {
+    ctx.state.keyValid = await db.checkPasswordResetKey(key)
+    ctx.state.key = key
+  } else {
+    ctx.state.keyValid = false
+    ctx.state.key = ''
+  }
   next()
 })
 
@@ -268,8 +273,15 @@ router.post('/auth/login', async (ctx, next) => {
 })
 
 router.post('/auth/set-password', async (ctx, next) => {
-  await db.resetPassword(ctx.request.body.key, ctx.request.body.password)
-  ctx.redirect('/login')
+  if (ctx.request.body.key) {
+    await db.resetPassword(ctx.request.body.key, ctx.request.body.password)
+  } else if (ctx.state.user) {
+    await db.setPassword(ctx.state.user.username, ctx.request.body.password)
+  } else {
+    ctx.status = 400
+    return
+  }
+  ctx.redirect('/login?reset-success=1')
 })
 
 // Logout route
@@ -278,8 +290,7 @@ router.get('/logout', (ctx) => ctx.logout(() => ctx.redirect('/')))
 app.use(router.routes())
 app.use(router.allowedMethods())
 
-// Start the server
+bridgeInfo.startHostUpdater()
+
 const port = process.env.PORT || 3000
 app.listen(port, () => console.log(`Server running on port ${port}`))
-
-setInterval(bridgeInfo.updateHosts, 5000)

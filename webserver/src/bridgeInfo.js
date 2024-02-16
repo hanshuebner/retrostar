@@ -1,7 +1,9 @@
 const util = require('util')
-const loadTapMap = require('./loadTapMap')
-const db = require('./db')
 const exec = util.promisify(require('child_process').exec)
+const fs = require('fs')
+
+const tapInterfaces = require('./tapInterfaces')
+const db = require('./db')
 
 const getBridgeNodes = async () => {
   const { stdout } = await exec('bridge fdb show')
@@ -16,9 +18,17 @@ const getBridgeNodes = async () => {
 }
 
 const updateHosts = async () => {
-  const tapToUser = loadTapMap()
+  const tapToUser = tapInterfaces.loadTapMap()
   const bridgeNodes = await getBridgeNodes()
   await db.touchHosts(bridgeNodes.map(([tap, mac]) => [tapToUser[tap], mac]))
 }
 
-module.exports = { updateHosts }
+const startHostUpdater = () => {
+  if (fs.existsSync(tapInterfaces.directory)) {
+    setInterval(updateHosts, 1000)
+  } else {
+    console.log('No tap directory found, not starting host updater')
+  }
+}
+
+module.exports = { startHostUpdater }

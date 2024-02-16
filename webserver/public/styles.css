@@ -55,30 +55,60 @@ body {
     padding: 16px;
 }
 
-nav .menu-right {
-    float: right;
-}
 
-.menu {
-    list-style: none;
-    display: inline-flex;
-    font-size: 160%;
+header {
     background-color: #d9c052;
-    width: 100%;
-}
-
-.menu li {
-    margin-right: 16px;
-}
-
-.menu a {
     color: #fff;
-    text-decoration: none;
-    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    font-size: 120%;
+    margin-bottom: 2em;
 }
 
-.menu a:hover {
-    background-color: #555;
+.logo img {
+    width: 50px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+}
+
+nav ul li {
+    margin-right: 20px;
+}
+
+nav ul li:last-child {
+    margin-right: 0;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #fff;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    width: 50px;
+}
+
+.user img {
+    width: 80px;
+}
+
+.login-btn {
+    text-decoration: none;
+    color: #fff;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+    .logo img {
+        width: 40px;
+    }
 }
 
 .active a {

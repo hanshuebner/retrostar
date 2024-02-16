@@ -11,10 +11,12 @@ const init = () => {
   if (urlParams.get('error')) {
     document.querySelector('.logfail').style.display = 'block'
   }
+  if (urlParams.get('reset-success')) {
+    document.querySelector('.reset-success').style.display = 'block'
+  }
 
   const newUrl = window.location.href.split('?')[0]
   window.history.replaceState({}, document.title, newUrl)
 }
 
-// Call the function when the page loads
 window.onload = init
