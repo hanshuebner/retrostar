@@ -163,7 +163,7 @@ const getLatServices = async () => {
     .trim()
     .split('\n')
     .map((line) => {
-      const [name, status, description] = line.split(/\s+/)
+      const [name, status, description] = line.split(/\s+/, 3)
       return { name, status, description }
     })
 }
