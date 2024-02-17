@@ -10,15 +10,18 @@ const loadHostProtocols = async () =>
     {}
   )
 
-const handlePacket = async (hosts, mac_address, protocol) => {
+const handlePacket = async (hosts, mac_address, protocolHex) => {
   if (!hosts[mac_address]) {
     console.log(`Unknown host ${mac_address}, reloading from DB`)
     hosts = await loadHostProtocols()
   }
+  const protocol = parseInt(protocolHex, 16)
   if (hosts[mac_address]) {
-    console.log(`Adding protocol ${protocol} to ${mac_address}`)
-    hosts[mac_address].add(parseInt(protocol, 16))
-    await db.updateHostProtocols(mac_address, Array.from(hosts[mac_address]))
+    if (!hosts[mac_address].has(protocol)) {
+        console.log(`Adding protocol ${protocolHex} to ${mac_address}`)
+        hosts[mac_address].add(protocol)
+        await db.updateHostProtocols(mac_address, Array.from(hosts[mac_address]))
+    }
   } else {
     console.log(`Unknown MAC address: ${mac_address}`)
   }
