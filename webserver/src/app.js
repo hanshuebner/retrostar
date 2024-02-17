@@ -11,6 +11,8 @@ const koaStatic = require('koa-static')
 const session = require('koa-session')
 const websockify = require('koa-websocket')
 const pty = require('node-pty')
+const util = require('util')
+const exec = util.promisify(require('child_process').exec)
 const passport = require('koa-passport')
 const GitHubStrategy = require('passport-github2').Strategy
 const db = require('./db')
@@ -155,21 +157,19 @@ router.get('/status', async (ctx, next) => {
   await next()
 })
 
-const getLatServices = () => {
-  return [
-    {
-      name: 'host1',
-      description: 'Connect to a DECnet node',
-    },
-    {
-      name: 'host2',
-      description: 'Connect to a Telnet server',
-    },
-  ]
+const getLatServices = async () => {
+  const { stdout } = await exec('llogin -d')
+  return stdout
+    .trim()
+    .split('\n')
+    .map((line) => {
+      const [name, status, description] = line.split(/\s+/)
+      return { name, status, description }
+    })
 }
 
 router.get('/lat', async (ctx, next) => {
-  ctx.state.services = getLatServices()
+  ctx.state.services = await getLatServices()
   await next()
 })
 
@@ -334,7 +334,7 @@ app.ws.use(
     console.log('new websocket connection to ', host)
 
     await printOnTerminal(`Verbinde zu ${host}...`)
-    const ptyProcess = pty.spawn('/bin/bash', ['-c', `telnet ${host}`], {
+    const ptyProcess = pty.spawn('/bin/bash', ['-c', `llogin -n "web.${ctx.state.user.username}" ${host}`], {
       name: 'vt100',
       env: process.env,
       cwd: process.env.HOME,
