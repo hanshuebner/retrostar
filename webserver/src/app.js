@@ -164,9 +164,9 @@ const getLatServices = async () => {
     .split('\n')
     .map((line) => {
       const [_, name, status, description] = line.match(/^(\S+)\s+(\S+)\s+(.*)$/)
-      console.log('split', line, 'to', [name, status, description])
       return { name, status, description }
     })
+    .filter(({status}) => status === 'Available')
 }
 
 router.get('/lat', async (ctx, next) => {
