@@ -8,12 +8,14 @@ const Router = require('koa-router')
 const bodyParser = require('koa-bodyparser')
 const koaStatic = require('koa-static')
 const session = require('koa-session')
+const websockify = require('koa-websocket')
+const pty = require('node-pty')
 const passport = require('koa-passport')
 const GitHubStrategy = require('passport-github2').Strategy
 const db = require('./db')
 const bridgeInfo = require('./bridgeInfo')
 
-const app = new Koa()
+const app = websockify(new Koa())
 const router = new Router()
 const path = require('path')
 const Ajv = require('ajv')
@@ -286,6 +288,37 @@ router.post('/auth/set-password', async (ctx, next) => {
 
 // Logout route
 router.get('/logout', (ctx) => ctx.logout(() => ctx.redirect('/')))
+
+// WebSocket route
+app.ws.use((ctx, next) => {
+  // Create a new PTY process
+  const ptyProcess = pty.spawn(shell, [], {
+    name: 'vt100',
+    env: process.env,
+    cwd: process.env.HOME,
+    cols: 80,
+    rows: 24,
+  })
+  console.log('new websocket session')
+
+  // When UI sends message, resize or run command
+  ctx.websocket.on('message', (message) => {
+    const processedMessage = messageProcessor(message)
+    if (processedMessage.type === 'command') {
+      ptyProcess.write(processedMessage.command)
+    } else if (processedMessage.type === 'resize') {
+      ptyProcess.resize(processedMessage.cols, processedMessage.rows)
+    }
+  })
+
+  // When PTY returns data, send to UI
+  ptyProcess.on('data', function (rawOutput) {
+    const processedOutput = outputProcessor(rawOutput)
+    ctx.websocket.send(processedOutput)
+  })
+
+  return next()
+})
 
 app.use(router.routes())
 app.use(router.allowedMethods())
