@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="xterm.css">
+<link rel="stylesheet" href="lat.css">
+<script src="xterm.js"></script>
+<div class="choose-host">
+  <p>
+    Diese Systeme sind per LAT zu erreichen.  Durch Klick auf den Namen kannst
+    Du eine Terminalverbindung herstellen.
+  </p>
+  <table>
+    <thead>
+    <tr>
+      <th>Name</th>
+      <th>Beschreibung</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% for (let i = 0; i < services.length; i++) { const service = services[i] %>
+    <tr>
+      <td><a onclick="connect('<%= service.name %>')"><%= service.name %></a></td>
+      <td><%= service.description %></td>
+    </tr>
+    <% } %>
+    </tbody>
+  </table>
+</div>
+<div id="terminal"></div>
+<script src="lat.js"></script>

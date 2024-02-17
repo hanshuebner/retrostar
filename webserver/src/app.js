@@ -5,6 +5,7 @@ const marked = require('marked')
 const ejs = require('ejs')
 const Koa = require('koa')
 const Router = require('koa-router')
+const route = require('koa-route')
 const bodyParser = require('koa-bodyparser')
 const koaStatic = require('koa-static')
 const session = require('koa-session')
@@ -32,10 +33,15 @@ app.use(koaStatic(resolvePath('public')))
 // Session middleware
 app.keys = [process.env.SESSION_SECRET]
 app.use(session({}, app))
+app.ws.use(session({}, app))
 
 // Initialize passport middleware
-app.use(passport.initialize())
-app.use(passport.session())
+const passportMiddleware = passport.initialize()
+app.use(passportMiddleware)
+app.ws.use(passportMiddleware)
+const passportSession = passport.session()
+app.use(passportSession)
+app.ws.use(passportSession)
 
 // GitHub OAuth2 configuration
 passport.use(
@@ -146,6 +152,24 @@ router.get('/status', async (ctx, next) => {
     decnet: ethernetToDecnet(host.mac_address),
   }))
 
+  await next()
+})
+
+const getLatServices = () => {
+  return [
+    {
+      name: 'host1',
+      description: 'Connect to a DECnet node',
+    },
+    {
+      name: 'host2',
+      description: 'Connect to a Telnet server',
+    },
+  ]
+}
+
+router.get('/lat', async (ctx, next) => {
+  ctx.state.services = getLatServices()
   await next()
 })
 
@@ -289,36 +313,45 @@ router.post('/auth/set-password', async (ctx, next) => {
 // Logout route
 router.get('/logout', (ctx) => ctx.logout(() => ctx.redirect('/')))
 
-// WebSocket route
-app.ws.use((ctx, next) => {
-  // Create a new PTY process
-  const ptyProcess = pty.spawn(shell, [], {
-    name: 'vt100',
-    env: process.env,
-    cwd: process.env.HOME,
-    cols: 80,
-    rows: 24,
-  })
-  console.log('new websocket session')
-
-  // When UI sends message, resize or run command
-  ctx.websocket.on('message', (message) => {
-    const processedMessage = messageProcessor(message)
-    if (processedMessage.type === 'command') {
-      ptyProcess.write(processedMessage.command)
-    } else if (processedMessage.type === 'resize') {
-      ptyProcess.resize(processedMessage.cols, processedMessage.rows)
-    }
-  })
-
-  // When PTY returns data, send to UI
-  ptyProcess.on('data', function (rawOutput) {
-    const processedOutput = outputProcessor(rawOutput)
-    ctx.websocket.send(processedOutput)
-  })
-
-  return next()
+app.use(async (ctx, next) => {
+  ctx.session.hehe = 'asd'
+  await next()
 })
+
+// WebSocket route
+app.ws.use(
+  route.all('/ws/lat/:host', async (ctx, host) => {
+    const printOnTerminal = (message) =>
+      ctx.websocket.send(`\x07\r\r\n\x1b[1m*** ${message} ***\x1b[0m\r\n\n`)
+
+    if (!ctx.state.user) {
+      console.log('unauthorized websocket connection')
+      await printOnTerminal('Du bist nicht angemeldet.')
+      setInterval(() => ctx.websocket.close(), 5000)
+      return
+    }
+
+    console.log('new websocket connection to ', host)
+
+    await printOnTerminal(`Verbinde zu ${host}...`)
+    const ptyProcess = pty.spawn('/bin/bash', ['-c', `telnet ${host}`], {
+      name: 'vt100',
+      env: process.env,
+      cwd: process.env.HOME,
+      cols: 80,
+      rows: 24,
+    })
+
+    ctx.websocket.on('message', (data) => ptyProcess.write(data))
+    ptyProcess.on('data', (data) => ctx.websocket.send(data))
+    ptyProcess.on('exit', () => {
+      printOnTerminal('Verbindung beendet')
+      setInterval(() => {
+        ctx.websocket.close()
+      }, 5000)
+    })
+  })
+)
 
 app.use(router.routes())
 app.use(router.allowedMethods())
