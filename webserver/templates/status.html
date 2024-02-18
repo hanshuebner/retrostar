@@ -2,25 +2,23 @@
 <table>
   <thead>
   <tr>
-    <th>MAC-Adresse</th>
-    <th>Besitzer</th>
-    <th>DECNET</th>
     <th>Name</th>
+    <th>MAC-Adresse</th>
+    <th>Hardware</th>
+    <th>Software</th>
     <th>Protokolle</th>
+    <th>Besitzer</th>
   </tr>
   </thead>
   <tbody>
   <% for (let i = 0; i < hosts.length; i++) { const host = hosts[i] %>
-    <tr>
+    <tr data-mac-address="<%= host.mac_address %>">
+      <td data-field="name" contenteditable="<%= host.editable %>"><%= host.name %></td>
       <td><%= host.mac_address %></td>
+      <td data-field="hardware" contenteditable="<%= host.editable %>"><%= host.hardware %></td>
+      <td data-field="software" contenteditable="<%= host.editable %>"><%= host.software %></td>
+      <td><%- host.protocols?.map(({ name, description}) => `<span title="${description}" class="protocol">${name}</span>`).join(' ') %></td>
       <td><%= host.owner %></td>
-      <td><%= host.decnet %></td>
-      <td contenteditable="true"
-          onBlur="sendData(this, '<%= host.mac_address %>')"
-          onkeydown="handleKeyDown(event, this, '<%= host.mac_address %>')">
-        <%= host.name %>
-      </td>
-      <td><%- host.protocols?.sort().map(number => `<span title="${protocols[number]?.description}" class="protocol">${protocols[number]?.name || number.toString(16).toUppercase()}</span>`).join(' ') %></td>
     </tr>
   <% } %>
   </tbody>

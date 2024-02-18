@@ -134,17 +134,23 @@ const getAllHosts = async () =>
     return result.rows
   })
 
-const updateHost = async (username, macAddress, hostname, description) =>
+const updateHost = async (
+  username,
+  macAddress,
+  { name, description, hardware, software }
+) =>
   withClient(async (client) => {
     const result = await client.query(
       `UPDATE host
-       SET name        = $1,
-           description = $2
-       WHERE mac_address = $3
+       SET name        = coalesce($3, name),
+           description = coalesce($4, description),
+           hardware    = coalesce($5, hardware),
+           software    = coalesce($6, software)
+       WHERE mac_address = $1
          AND user_id = (SELECT id
                         FROM "user"
-                        WHERE name = $4);`,
-      [hostname, description, macAddress, username]
+                        WHERE name = $2);`,
+      [macAddress, username, name, description, hardware, software]
     )
     return result.rows
   })

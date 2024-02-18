@@ -148,9 +148,17 @@ router.get('/installation', isAuthenticated, async (ctx, next) => {
 })
 
 router.get('/status', async (ctx, next) => {
-  ctx.state.protocols = await db.getProtocols()
+  const protocols = await db.getProtocols()
   ctx.state.hosts = (await db.getActiveHosts()).map((host) => ({
     ...host,
+    editable: ctx.state.user?.id === host.user_id,
+    protocols: host.protocols?.sort().map((number) => {
+      const protocol = protocols[number]
+      return {
+        name: protocol?.name || number.toString(16).toUpperCase(),
+        description: protocol?.description,
+      }
+    }),
     decnet: ethernetToDecnet(host.mac_address),
   }))
 
@@ -163,10 +171,12 @@ const getLatServices = async () => {
     .trim()
     .split('\n')
     .map((line) => {
-      const [_, name, status, description] = line.match(/^(\S+)\s+(\S+)\s+(.*)$/)
+      const [_, name, status, description] = line.match(
+        /^(\S+)\s+(\S+)\s+(.*)$/
+      )
       return { name, status, description }
     })
-    .filter(({status}) => status === 'Available')
+    .filter(({ status }) => status === 'Available')
 }
 
 router.get('/lat', async (ctx, next) => {
@@ -232,6 +242,8 @@ const validateHostUpdateSchema = new Ajv().compile({
   properties: {
     name: { type: 'string' },
     description: { type: 'string' },
+    hardware: { type: 'string' },
+    software: { type: 'string' },
   },
   additionalProperties: false,
 })
@@ -241,15 +253,17 @@ router.put('/api/host/:mac_address', isAuthenticated, async (ctx) => {
 
   if (!valid) {
     ctx.status = 400
-    ctx.body = validate.errors
+    ctx.body = {
+      message: 'schema validation errors',
+      errors: validateHostUpdateSchema.errors,
+    }
     return
   }
 
   await db.updateHost(
     ctx.state.user.username,
     ctx.params.mac_address,
-    ctx.request.body.name,
-    ctx.request.body.description
+    ctx.request.body
   )
 
   ctx.status = 204
@@ -335,13 +349,17 @@ app.ws.use(
     console.log('new websocket connection to ', host)
 
     await printOnTerminal(`Verbinde zu ${host}...`)
-    const ptyProcess = pty.spawn('/bin/bash', ['-c', `llogin -n "web.${ctx.state.user.username}" ${host}`], {
-      name: 'vt100',
-      env: process.env,
-      cwd: process.env.HOME,
-      cols: 80,
-      rows: 24,
-    })
+    const ptyProcess = pty.spawn(
+      '/bin/bash',
+      ['-c', `llogin -n "web.${ctx.state.user.username}" ${host}`],
+      {
+        name: 'vt100',
+        env: process.env,
+        cwd: process.env.HOME,
+        cols: 80,
+        rows: 24,
+      }
+    )
 
     ctx.websocket.on('message', (data) => ptyProcess.write(data))
     ptyProcess.on('data', (data) => ctx.websocket.send(data))

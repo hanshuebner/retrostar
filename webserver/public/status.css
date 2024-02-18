@@ -9,3 +9,36 @@
     font-size: 70%;
     font-weight: bold;
 }
+
+.save-success {
+    animation: success-animation 0.3s alternate 2;
+}
+
+@keyframes success-animation {
+    0%, 100% {
+        background-color: white;
+    }
+    50% {
+        background-color: green;
+    }
+}
+
+.save-failure {
+    animation: failure-animation 0.3s alternate 2;
+}
+
+@keyframes failure-animation {
+    0%, 100% {
+        background-color: white;
+    }
+    50% {
+        background-color: red;
+    }
+}
+
+td[contenteditable="true"] {
+    background-image: url('pencil.png');
+    background-repeat: no-repeat;
+    background-size: auto 50%;
+    background-position: right center;
+}
