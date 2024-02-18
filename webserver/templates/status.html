@@ -30,9 +30,12 @@
   Liste der Protokolle wird fortlaufend ermittelt, jedoch werden
   Protokolle nicht automatisch gelöscht.
 </p>
+<% if (typeof user == 'object') { %>
 <p>
-  Die Namen können vom jeweiligen Besitzer geändert werden. Dazu
-  einfach auf die (leere) Zelle klicken, den gewünschten Namen
-  eingeben und dann woandershin klicken oder Enter drücken.
+  Du kannst die Datenbankeinträge für Deine Systeme direkt bearbeiten, indem
+  Du in eines mit einem Stift <img src="pencil.png" height="15"/> gekennzeichneten Felder
+  klickst.  Änderungen werden gespeichert, sobald Du ENTER drückst oder das
+  Feld verlässt.
 </p>
+<% } %>
 <script src="status.js"></script>

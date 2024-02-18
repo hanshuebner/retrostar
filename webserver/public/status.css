@@ -41,4 +41,5 @@ td[contenteditable="true"] {
     background-repeat: no-repeat;
     background-size: auto 50%;
     background-position: right center;
+    padding-right: 30px;
 }
