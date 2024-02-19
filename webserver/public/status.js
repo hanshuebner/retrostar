@@ -36,4 +36,4 @@ const init = () => {
   })
 }
 
-window.onload = init
+window.addEventListener('load', init)

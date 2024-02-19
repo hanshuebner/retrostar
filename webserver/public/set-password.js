@@ -67,4 +67,4 @@ const init = () => {
   firstInput.focus()
 }
 
-window.onload = init
+window.addEventListener('load', init)

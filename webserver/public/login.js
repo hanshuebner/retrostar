@@ -19,4 +19,4 @@ const init = () => {
   window.history.replaceState({}, document.title, newUrl)
 }
 
-window.onload = init
+window.addEventListener('load', init)

@@ -1,0 +1,14 @@
+#event-log {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 800px;
+    max-height: 150px;
+    overflow: auto;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 4px;
+    z-index: 1000;
+}

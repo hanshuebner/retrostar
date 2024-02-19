@@ -1,18 +1,20 @@
 const { Pool } = require('pg')
-const memoize = require('memoizee')
 
-const makePool = () =>
-  new Pool({
-    user: process.env.PGUSER,
-    password: process.env.PGPASSWORD,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE || 'retrostar',
-    port: process.env.PGPORT,
-  })
+const pool = new Pool({
+  connectionTimeoutMillis: 5000,
+  max: 100,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE || 'retrostar',
+  port: process.env.PGPORT,
+})
+
+const connect = async () => pool.connect()
 
 // Middleware function to allocate PostgreSQL database connection and manage transactions
 const withClient = async (handler) => {
-  const client = makePool()
+  const client = await connect()
   let result = null
   try {
     await client.query('BEGIN')
@@ -22,7 +24,7 @@ const withClient = async (handler) => {
     await client.query('ROLLBACK')
     throw error
   } finally {
-    await client.end()
+    await client.release()
   }
   return result
 }
@@ -117,7 +119,8 @@ const getActiveHosts = async () =>
       `SELECT h.*, u.name AS owner
        FROM host h
                 JOIN "user" u ON u.id = h.user_id
-       WHERE h.last_seen > NOW() - INTERVAL \'5 minutes\' AND h.protocols IS NOT NULL
+       WHERE h.last_seen > NOW() - INTERVAL \'5 minutes\'
+         AND h.protocols IS NOT NULL
        ORDER BY u.name, h.mac_address::VARCHAR`
     )
     return result.rows
@@ -142,10 +145,10 @@ const updateHost = async (
   withClient(async (client) => {
     const result = await client.query(
       `UPDATE host
-       SET name        = coalesce($3, name),
-           description = coalesce($4, description),
-           hardware    = coalesce($5, hardware),
-           software    = coalesce($6, software)
+       SET name        = COALESCE($3, name),
+           description = COALESCE($4, description),
+           hardware    = COALESCE($5, hardware),
+           software    = COALESCE($6, software)
        WHERE mac_address = $1
          AND user_id = (SELECT id
                         FROM "user"
@@ -182,6 +185,8 @@ const getProtocols = async () =>
   })
 
 module.exports = {
+  connect,
+  withClient,
   middleware,
   getConfigurationByInstallKey,
   getInstallKeyByUser,

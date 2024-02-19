@@ -16,6 +16,7 @@ const exec = util.promisify(require('child_process').exec)
 const passport = require('koa-passport')
 const GitHubStrategy = require('passport-github2').Strategy
 const db = require('./db')
+const event = require('./event')
 const bridgeInfo = require('./bridgeInfo')
 
 const app = websockify(new Koa())
@@ -305,6 +306,7 @@ router.post('/auth/login', async (ctx, next) => {
         // If Local authentication succeeds, log in the user
         await ctx.login(user)
         ctx.redirect(ctx.request.query.path || '/')
+        event.publish('web-login', `${username} hat sich auf dem Webserver angemeldet.`, { username })
       }
     })(ctx, next)
   } else {
@@ -328,11 +330,6 @@ router.post('/auth/set-password', async (ctx, next) => {
 // Logout route
 router.get('/logout', (ctx) => ctx.logout(() => ctx.redirect('/')))
 
-app.use(async (ctx, next) => {
-  ctx.session.hehe = 'asd'
-  await next()
-})
-
 // WebSocket route
 app.ws.use(
   route.all('/ws/lat/:host', async (ctx, host) => {
@@ -348,10 +345,13 @@ app.ws.use(
 
     console.log('new websocket connection to ', host)
 
+    const username = ctx.state.user.username
+    await event.publish('lat-connect', `${username} hat eine LAT-Verbindung zu ${host} hergestellt`, { username, host })
+
     await printOnTerminal(`Verbinde zu ${host}...`)
     const ptyProcess = pty.spawn(
       '/bin/bash',
-      ['-c', `llogin -n "web.${ctx.state.user.username}" ${host}`],
+      ['-c', `llogin -n "web.${username}" ${host}`],
       {
         name: 'vt100',
         env: process.env,
@@ -372,10 +372,50 @@ app.ws.use(
   })
 )
 
+app.ws.use(
+  route.all('/ws/event-log', async (ctx) => {
+    if (!ctx.state.user) {
+      console.log('unauthorized websocket connection')
+      setInterval(() => ctx.websocket.close(), 5000)
+      return
+    }
+
+    const client = await db.connect()
+    await client.query('LISTEN event')
+    const sendEvent = async (event) => ctx.websocket.send(JSON.stringify(event))
+
+    const result = await client.query(`SELECT *
+                                       FROM event
+                                       ORDER BY timestamp DESC
+                                       LIMIT 50`)
+    result.rows.reverse().forEach(sendEvent)
+
+    client.removeAllListeners('notification')
+    client.on('notification', async (msg) => {
+      const result = await client.query(
+        `SELECT *
+         FROM event
+         WHERE id = $1::integer`,
+        [msg.payload]
+      )
+      sendEvent(result.rows[0])
+    })
+    ctx.websocket.on('close', () => {
+      client.release()
+      console.log('event log ended, client released')
+    })
+    console.log('event log started')
+  })
+)
+
 app.use(router.routes())
 app.use(router.allowedMethods())
 
 bridgeInfo.startHostUpdater()
 
 const port = process.env.PORT || 3000
-app.listen(port, () => console.log(`Server running on port ${port}`))
+
+app.listen(port, async () => {
+  console.log(`Server running on port ${port}`)
+  event.publish('server-start', "Der Webserver wurde gestartet")
+})
