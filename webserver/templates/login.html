@@ -11,5 +11,12 @@
   </div>
   <div class="logfail">Login fehlgeschlagen.</div>
   <button type="submit">Login</button>
+  <div class="forum-login">
+    <% if (message) { %>
+    <div><%= message %></div>
+    <% } else { %>
+    <div><button onclick="window.location.href = '/auth'">Über das classic-computing.de-Forum anmelden</button></div>
+    <% } %>
+  </div>
   <script src="login.js"></script>
 </form>

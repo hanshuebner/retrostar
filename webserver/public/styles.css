@@ -94,7 +94,7 @@ nav ul li a {
 .user {
     display: flex;
     align-items: center;
-    width: 50px;
+    width: 100px;
 }
 
 .user img {

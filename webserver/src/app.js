@@ -46,6 +46,37 @@ const passportSession = passport.session()
 app.use(passportSession)
 app.ws.use(passportSession)
 
+const verifyForumLogin = (
+  issuer,
+  uiProfile,
+  idProfile,
+  context,
+  idToken,
+  accessToken,
+  refreshToken,
+  params,
+  verified
+) => {
+  // The verify strategy callback must have this signature so that the raw
+  // profile information is available in the `idProfile` parameter.
+
+  const claims = uiProfile._json
+  const username = claims.nickname
+  if (!claims.rank?.match(/^(Fördermitglied|Schiedsrichter|Vereinsmitglied|Vorstand|Moderator|Administrator)$/)) {
+    console.log('unauthorized forum user', username, claims.rank)
+    return verified(null, false, { message: "Dieses System ist nur für Mitglieder des VzEkC e.V. zugänglich." })
+  }
+  event.publish(
+    'web-login',
+    `${username} hat sich über das Forum auf dem Webserver angemeldet.`,
+    { username }
+  )
+  return verified(null, {
+    username: username,
+    ...idProfile,
+  })
+}
+
 // GitHub OAuth2 configuration
 passport.use(
   'oidc',
@@ -58,12 +89,15 @@ passport.use(
       authorizationURL: process.env.OIDC_AUTHORIZATION_URL,
       tokenURL: process.env.OIDC_TOKEN_URL,
       userInfoURL: process.env.OIDC_USERINFO_URL,
-      scope: 'openid nickname picture profile coverPhoto email email_verified locale rank birthdate aboutMe gender location occupation hobbies website icq skype facebook twitter zoneinfo',
+      scope: [
+        'openid',
+        'nickname',
+        'email',
+        'rank',
+        'profile',
+      ],
     },
-    (issuer, profile, done) => {
-      console.log('profile', profile)
-      return done(null, profile)
-    }
+    verifyForumLogin
   )
 )
 
@@ -202,6 +236,16 @@ router.get('/set-password', async (ctx, next) => {
   next()
 })
 
+router.get('/login', (ctx, next) => {
+  if (ctx.session.messages) {
+    ctx.state.message = ctx.session.messages[0]
+    delete ctx.session.messages
+  } else {
+    ctx.state.message = null
+  }
+  next()
+})
+
 router.get('/:page', (ctx, next) => {
   let content = null
   if (fs.existsSync(resolvePath('templates', `${ctx.params.page}.md`))) {
@@ -281,7 +325,8 @@ router.get(
   '/auth/callback',
   passport.authenticate('oidc', {
     successRedirect: '/',
-    failureRedirect: '/',
+    failureRedirect: '/login',
+    failureMessage: true,
   })
 )
 
@@ -305,7 +350,11 @@ router.post('/auth/login', async (ctx, next) => {
         // If Local authentication succeeds, log in the user
         await ctx.login(user)
         ctx.redirect(ctx.request.query.path || '/')
-        event.publish('web-login', `${username} hat sich auf dem Webserver angemeldet.`, { username })
+        event.publish(
+          'web-login',
+          `${username} hat sich auf dem Webserver angemeldet.`,
+          { username }
+        )
       }
     })(ctx, next)
   } else {
@@ -327,7 +376,12 @@ router.post('/auth/set-password', async (ctx, next) => {
 })
 
 // Logout route
-router.get('/logout', (ctx) => ctx.logout(() => ctx.redirect('/')))
+router.post('/logout', (ctx) => {
+  if (ctx.state?.user?.username) {
+    event.publish('web-logout', `${ctx.state.user.username} hat sich vom Webserver abgemeldet`)
+  }
+  ctx.logout(() => ctx.redirect('/'))
+})
 
 // WebSocket route
 app.ws.use(
@@ -345,7 +399,11 @@ app.ws.use(
     console.log('new websocket connection to ', host)
 
     const username = ctx.state.user.username
-    await event.publish('lat-connect', `${username} hat eine LAT-Verbindung zu ${host} hergestellt`, { username, host })
+    await event.publish(
+      'lat-connect',
+      `${username} hat eine LAT-Verbindung zu ${host} hergestellt`,
+      { username, host }
+    )
 
     await printOnTerminal(`Verbinde zu ${host}...`)
     const ptyProcess = pty.spawn(
@@ -416,5 +474,5 @@ const port = process.env.PORT || 3000
 
 app.listen(port, async () => {
   console.log(`Server running on port ${port}`)
-  event.publish('server-start', "Der Webserver wurde gestartet")
+  event.publish('server-start', 'Der Webserver wurde gestartet')
 })
