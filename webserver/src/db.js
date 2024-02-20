@@ -184,6 +184,17 @@ const getProtocols = async () =>
     }, {})
   })
 
+const getUserId = async (username) =>
+  withClient(async (client) => {
+    const result = await client.query(
+      `SELECT id
+       FROM "user"
+       WHERE name = $1`,
+      [username]
+    )
+    return result.rows[0]?.id
+  })
+
 module.exports = {
   connect,
   withClient,
@@ -200,4 +211,5 @@ module.exports = {
   updateHost,
   updateHostProtocols,
   getProtocols,
+  getUserId,
 }

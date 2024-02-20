@@ -38,7 +38,9 @@
                 <button type="submit" class="logout-btn">Logout</button>
             </form>
         <% } else { %>
-            <a href="/auth" class="login-btn">Login</a>
+                <form action="/auth" method="get">
+                    <button type="submit" class="logout-btn">Login</button>
+                </form>
         <% } %>
     </div>
 </header>

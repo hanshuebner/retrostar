@@ -46,7 +46,7 @@ const passportSession = passport.session()
 app.use(passportSession)
 app.ws.use(passportSession)
 
-const verifyForumLogin = (
+const verifyForumLogin = async (
   issuer,
   uiProfile,
   idProfile,
@@ -73,7 +73,7 @@ const verifyForumLogin = (
   )
   return verified(null, {
     username: username,
-    ...idProfile,
+    id: await db.getUserId(username),
   })
 }
 
