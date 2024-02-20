@@ -23,4 +23,4 @@ done
 json_data="{${json_data#,}}"
 
 # Insert data into the event table
-psql -d retrostar -c "INSERT INTO event (type, message, data) VALUES ('$message_type', '$message', '$json_data');"
+psql -U retrostar -d retrostar -c "INSERT INTO event (type, message, data) VALUES ('$message_type', '$message', '$json_data');"
