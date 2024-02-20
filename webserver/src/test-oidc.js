@@ -29,7 +29,7 @@ passport.use(
       authorizationURL: process.env.OIDC_AUTHORIZATION_URL,
       tokenURL: process.env.OIDC_TOKEN_URL,
       userInfoURL: process.env.OIDC_USERINFO_URL,
-      scope: 'nickname',
+      scope: 'openid email',
     },
     (tokenSet, userinfo, done) => {
       // You can process the user info here or save it in session
@@ -83,5 +83,5 @@ app.use(router.allowedMethods())
 // Start server
 const port = process.env.PORT || 3000
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`)
+  console.log(`Server listening on port http://localhost:${port}/protected`)
 })

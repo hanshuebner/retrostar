@@ -14,7 +14,7 @@ const pty = require('node-pty')
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const passport = require('koa-passport')
-const GitHubStrategy = require('passport-github2').Strategy
+const OIDCStrategy = require('passport-openidconnect').Strategy
 const db = require('./db')
 const event = require('./event')
 const bridgeInfo = require('./bridgeInfo')
@@ -48,14 +48,20 @@ app.ws.use(passportSession)
 
 // GitHub OAuth2 configuration
 passport.use(
-  new GitHubStrategy(
+  'oidc',
+  new OIDCStrategy(
     {
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/auth/github/callback',
+      issuer: process.env.OIDC_ISSUER,
+      clientID: process.env.OIDC_CLIENT_ID,
+      clientSecret: process.env.OIDC_CLIENT_SECRET,
+      callbackURL: process.env.OIDC_CALLBACK_URL,
+      authorizationURL: process.env.OIDC_AUTHORIZATION_URL,
+      tokenURL: process.env.OIDC_TOKEN_URL,
+      userInfoURL: process.env.OIDC_USERINFO_URL,
+      scope: 'openid nickname picture profile coverPhoto email email_verified locale rank birthdate aboutMe gender location occupation hobbies website icq skype facebook twitter zoneinfo',
     },
-    (accessToken, refreshToken, profile, done) => {
-      // Here you can save user profile data to a database
+    (issuer, profile, done) => {
+      console.log('profile', profile)
       return done(null, profile)
     }
   )
@@ -99,7 +105,6 @@ const isAuthenticated = async (ctx, next) => {
   } else {
     if (ctx.accepts('html')) {
       ctx.redirect('/login?path=' + ctx.path)
-      // await passport.authenticate('github')(ctx, next)
     } else {
       ctx.status = 403
       ctx.body = 'Forbidden'
@@ -270,16 +275,11 @@ router.put('/api/host/:mac_address', isAuthenticated, async (ctx) => {
   ctx.status = 204
 })
 
-// GitHub authentication route
-router.get(
-  '/auth/github',
-  passport.authenticate('github', { scope: ['user:email'] })
-)
+router.get('/auth', passport.authenticate('oidc'))
 
-// GitHub authentication callback route
 router.get(
-  '/auth/github/callback',
-  passport.authenticate('github', {
+  '/auth/callback',
+  passport.authenticate('oidc', {
     successRedirect: '/',
     failureRedirect: '/',
   })
@@ -298,7 +298,6 @@ router.post('/auth/login', async (ctx, next) => {
       } else if (!user) {
         if (ctx.accepts('html')) {
           ctx.redirect('/login?error=1&path=' + (ctx.request.query.path || '/'))
-          // await passport.authenticate('github')(ctx, next)
         } else {
           ctx.status = 403
         }
@@ -310,8 +309,8 @@ router.post('/auth/login', async (ctx, next) => {
       }
     })(ctx, next)
   } else {
-    // If username or password is missing, attempt GitHub authentication
-    await passport.authenticate('github')(ctx, next)
+    // If username or password is missing, attempt OIDC authentication
+    await passport.authenticate('oidc')(ctx, next)
   }
 })
 
