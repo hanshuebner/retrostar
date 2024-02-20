@@ -61,7 +61,7 @@ const verifyForumLogin = (
   // profile information is available in the `idProfile` parameter.
 
   const claims = uiProfile._json
-  const username = claims.nickname
+  const username = claims.nickname.toLowerCase()
   if (!claims.rank?.match(/^(Fördermitglied|Schiedsrichter|Vereinsmitglied|Vorstand|Moderator|Administrator)$/)) {
     console.log('unauthorized forum user', username, claims.rank)
     return verified(null, false, { message: "Dieses System ist nur für Mitglieder des VzEkC e.V. zugänglich." })
