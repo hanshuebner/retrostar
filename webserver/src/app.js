@@ -420,12 +420,17 @@ app.ws.use(
     )
 
     ctx.websocket.on('message', (data) => ptyProcess.write(data))
+    ctx.websocket.on('error', () => ptyProcess.kill())
+    ctx.websocket.on('close', () => ptyProcess.kill())
     ptyProcess.on('data', (data) => ctx.websocket.send(data))
-    ptyProcess.on('exit', () => {
+    ptyProcess.on('exit', async () => {
       printOnTerminal('Verbindung beendet')
-      setInterval(() => {
-        ctx.websocket.close()
-      }, 5000)
+      await event.publish(
+        'lat-connect',
+        `${username} hat die LAT-Verbindung zu ${host} beendet`,
+         { username, host }
+      )
+      setInterval(() => ctx.websocket.close(), 5000)
     })
   })
 )
