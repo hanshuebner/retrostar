@@ -62,7 +62,8 @@ const verifyForumLogin = async (
 
   const claims = uiProfile._json
   const username = claims.nickname.toLowerCase()
-  if (!claims.rank?.match(/^(Fördermitglied|Schiedsrichter|Vereinsmitglied|Vorstand|Moderator|Administrator)$/)) {
+  const userId = await db.getUserId(username)
+  if (!userId && !claims.rank?.match(/^(Fördermitglied|Schiedsrichter|Vereinsmitglied|Vorstand|Moderator|Administrator)$/)) {
     console.log('unauthorized forum user', username, claims.rank)
     return verified(null, false, { message: "Dieses System ist nur für Mitglieder des VzEkC e.V. zugänglich." })
   }
@@ -73,7 +74,7 @@ const verifyForumLogin = async (
   )
   return verified(null, {
     username: username,
-    id: await db.getUserId(username),
+    id: userId,
   })
 }
 
