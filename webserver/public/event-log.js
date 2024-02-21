@@ -13,11 +13,24 @@ const addLog = (event) => {
 }
 
 const initEventLog = () => {
-  const socket = new WebSocket(
+  console.log('establishing websocket connection')
+
+  let socket
+
+  socket = new WebSocket(
     document.location.origin.replace(/^http/, 'ws') + '/ws/event-log'
   )
 
-  socket.onmessage = (event) => addLog(JSON.parse(event.data))
+  setInterval(() => {
+    if (socket?.readyState === 1) {
+      socket.send('ping')
+    } else {
+      console.log('event log connection closed, reloading in 2 seconds')
+      setTimeout(() => document.location.reload(), 2000)
+    }
+  }, 2000)
+
+    socket.onmessage = (event) => addLog(JSON.parse(event.data))
 }
 
 window.addEventListener('load', initEventLog)
