@@ -1,0 +1,15 @@
+[Unit]
+Description=RetroStar Webserver
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+User=hans
+WorkingDirectory=/home/hans/retrostar/webserver
+ExecStart=/usr/bin/npm run start
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+

@@ -464,11 +464,7 @@ app.ws.use(
       sendEvent(result.rows[0])
     })
     ctx.websocket.on('message', () => undefined)
-    ctx.websocket.on('close', () => {
-      client.release()
-      console.log('event log ended, client released')
-    })
-    console.log('event log started')
+    ctx.websocket.on('close', () => client.release())
   })
 )
 

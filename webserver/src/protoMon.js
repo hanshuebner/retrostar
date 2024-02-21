@@ -40,7 +40,6 @@ const protoMon = async () => {
   ])
 
   let hosts = await loadHostProtocols()
-  console.log('hosts:', hosts)
 
   tcpdumpProcess.stdout.on('data', (data) =>
     data
@@ -51,10 +50,7 @@ const protoMon = async () => {
         const match = line?.match(/ (.*) > .*, ethertype .*? \(0x(....)\)/)
         if (match) {
           const [_, mac_address, protocol] = match
-          console.log(`${mac_address} -> ${protocol}`)
           handlePacket(hosts, mac_address, protocol).then((newHosts) => hosts = newHosts)
-        } else {
-          console.log(`Received line: ${line}`)
         }
       })
   )
@@ -69,4 +65,4 @@ const protoMon = async () => {
   })
 }
 
-protoMon().then(console.log)
+protoMon()

@@ -1,0 +1,15 @@
+[Unit]
+Description=RetroStar Protocol Monitor
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+User=hans
+WorkingDirectory=/home/hans/retrostar/webserver
+ExecStart=/usr/bin/node src/protoMon.js
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
