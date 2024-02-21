@@ -5,7 +5,7 @@ set -e
 SCRIPT_DIR=$(dirname "$0")
 cd "$SCRIPT_DIR"
 
-psql -d retrostar -tAF' ' -c 'select u.name, oc.port_number from openvpn_configuration oc join "user" u on u.id = oc.user_id' | while read -r username port
+psql -U retrostar -d retrostar -tAF' ' -c 'select u.name, oc.port_number from openvpn_configuration oc join "user" u on u.id = oc.user_id' | while read -r username port
 do
     pid_file="/var/run/openvpn/$username.pid"
     if [ -f "$pid_file" ] && [ -e "/proc/$(cat $pid_file)" ]

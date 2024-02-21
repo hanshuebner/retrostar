@@ -1,0 +1,15 @@
+[Unit]
+Description=RetroStar OpenVPN processes
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/home/hans/retrostar/start-openvpn-servers.sh
+ExecStop=/usr/bin/pkill openvpn
+WorkingDirectory=/home/hans/retrostar
+User=root
+
+[Install]
+WantedBy=multi-user.target
