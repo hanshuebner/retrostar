@@ -275,7 +275,8 @@ router.get('/:page', (ctx, next) => {
   }
 })
 
-router.redirect('/', '/news')
+router.redirect('/', '/status')
+router.redirect('/news', '/status')
 
 router.get('/install.sh', (ctx) => {
   ctx.type = 'text/plain'
