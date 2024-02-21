@@ -1,7 +1,7 @@
 [Unit]
 Description=RetroStar Protocol Monitor
-After=network.target postgresql.service
-Requires=postgresql.service
+After=network.target postgresql.service retrostar-bridge.service
+Requires=postgresql.service retrostar-bridge.service
 
 [Service]
 User=hans

@@ -1,6 +1,7 @@
 [Unit]
 Description=LAT daemon
-After=network.target
+After=network.target retrostar-bridge.service
+Requires=retrostar-bridge.service
 
 [Service]
 Type=simple
