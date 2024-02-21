@@ -1,0 +1,15 @@
+[Unit]
+Description=LAT daemon
+After=network.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/latcp -s -i br0
+ExecStop=/usr/local/sbin/latcp -h
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+
