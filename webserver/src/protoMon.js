@@ -36,7 +36,7 @@ const protoMon = async () => {
     'br0',
     '-enn',
     '-s',
-    '14',
+    '28',
   ])
 
   let hosts = await loadHostProtocols()
