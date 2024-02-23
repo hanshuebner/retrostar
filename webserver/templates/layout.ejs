@@ -29,17 +29,12 @@
                         <a href="installation">Installation</a>
                     </li>
                 <% } %>
-<!--                 <li><a href="#" class="">LAT Terminal</a></li>
-                <li><a href="#" class="">Installation</a></li>
- -->            </ul>
+            </ul>
         </nav>
     </div>
     <div class="headerRight">
         <nav class="serviceNav">
             <ul class="menu">
-<!--                 <li><a class="" href="#">konnexus</a></li>
-                <li><a class="function" href="#">Logout</a></li>
- -->
             <% if (typeof user == "object") { %>
                 <li class="<%= page_name == "set-password" ? "active" : ""; %>">
                     <a href="/set-password"><%= user.username %></a>
@@ -61,45 +56,6 @@
         </nav>
     </div>
 </header>
-
-
-
-
-
-
-<!-- <header>
-    <div class="logo">
-        <img src="logo.png" alt="Site Logo">
-    </div>
-    <nav>
-        <ul class="menu">
-            <li class="<%= page_name == "status" ? "active" : ""; %>">
-                <a href="status">Status</a>
-            </li>
-            <% if (typeof user == "object") { %>
-                <li class="<%= page_name == "lat" ? "active" : ""; %>">
-                    <a href="lat">LAT Terminal</a>
-                </li>
-                <li class="<%= page_name == "installation" ? "active" : ""; %>">
-                    <a href="installation">Installation</a>
-                </li>
-            <% } %>
-        </ul>
-    </nav>
-    <div class="user">
-        <% if (typeof user == "object") { %>
-            <form action="/logout" method="post">
-                <button type="submit" class="logout-btn">Logout</button>
-            </form>
-        <% } else { %>
-                <form action="/auth" method="get">
-                    <button type="submit" class="logout-btn">Login</button>
-                </form>
-        <% } %>
-    </div>
-</header>
- -->
-
 
 <main>
     <%- content; %>
