@@ -2,6 +2,13 @@
 
 set -e
 
+if ip link show br0 &> /dev/null; then
+  echo br0 exists
+  exit 0
+fi
+
+mkdir -p /var/run/retrostar/clients
+
 ip link add name br0 type bridge
 ip link set dev br0 up
 
