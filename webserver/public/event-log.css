@@ -4,6 +4,7 @@
     right: 4;
     width: 680px;
     max-height: 150px;
+    max-height: 30%;
     overflow: auto;
     background-color: #000;
     border: 1px solid #ccc;
@@ -11,4 +12,5 @@
     padding: 8px;
     margin: 4px;
     z-index: 1000;
+    font-size: 80%;
 }
