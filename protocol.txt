@@ -1,0 +1,280 @@
+512	\N	Xerox PUP (conflicts with 802.3 Length Field range) (see 0A00)
+513	\N	Xerox PUP Address Translation (conflicts ...) (see 0A01)
+1024	\N	Nixdorf (conflicts with 802.3 Length Field)
+1536	\N	Xerox NS IDP
+1537	\N	XNS Address Translation (3Mb only)
+2049	\N	X.75 Internet
+2050	\N	NBS Internet
+2051	\N	ECMA Internet
+2052	\N	CHAOSnet
+2055	\N	XNS Compatibility
+2076	\N	Symbolics Private
+2184	\N	Xyplex
+2185	\N	Xyplex
+2186	\N	Xyplex
+2304	\N	Ungermann-Bass network debugger
+2560	\N	Xerox IEEE802.3 PUP
+2561	\N	Xerox IEEE802.3 PUP Address Translation
+2989	\N	Banyan Systems
+2991	\N	Banyon VINES Echo
+4096	\N	Berkeley Trailer negotiation
+4097	\N	Berkeley Trailer encapsulation for IP
+4098	\N	Berkeley Trailer encapsulation for IP
+4099	\N	Berkeley Trailer encapsulation for IP
+4100	\N	Berkeley Trailer encapsulation for IP
+4101	\N	Berkeley Trailer encapsulation for IP
+4102	\N	Berkeley Trailer encapsulation for IP
+4103	\N	Berkeley Trailer encapsulation for IP
+4104	\N	Berkeley Trailer encapsulation for IP
+4105	\N	Berkeley Trailer encapsulation for IP
+4106	\N	Berkeley Trailer encapsulation for IP
+4107	\N	Berkeley Trailer encapsulation for IP
+4108	\N	Berkeley Trailer encapsulation for IP
+4109	\N	Berkeley Trailer encapsulation for IP
+4110	\N	Berkeley Trailer encapsulation for IP
+4111	\N	Berkeley Trailer encapsulation for IP
+4660	\N	DCA - Multicast
+5632	\N	VALID system protocol
+6537	\N	Artificial Horizons ("Aviator" dogfight simulator [on Sun])
+6549	\N	Datapoint Corporation (RCL lan protocol)
+15360	\N	3Com NBP virtual circuit datagram (like XNS SPP) not registered
+15361	\N	3Com NBP System control datagram not registered
+15362	\N	3Com NBP Connect request (virtual cct) not registered
+15363	\N	3Com NBP Connect repsonse not registered
+15364	\N	3Com NBP Connect complete not registered
+15365	\N	3Com NBP Close request (virtual cct) not registered
+15366	\N	3Com NBP Close response not registered
+15367	\N	3Com NBP Datagram (like XNS IDP) not registered
+15368	\N	3Com NBP Datagram broadcast not registered
+15369	\N	3Com NBP Claim NetBIOS name not registered
+15370	\N	3Com NBP Delete Netbios name not registered
+15371	\N	3Com NBP Remote adaptor status request not registered
+15372	\N	3Com NBP Remote adaptor response not registered
+15373	\N	3Com NBP Reset not registered
+16962	\N	PCS Basic Block Protocol
+16972	\N	Information Modes Little Big LAN diagnostic
+17185	\N	THD - Diddle
+19522	\N	Information Modes Little Big LAN
+21000	\N	BBN Simnet Private
+24576	\N	DEC unassigned, experimental
+24581	\N	DEC diagnostic protocol (at interface initialization?)
+24582	\N	DEC customer protocol
+24584	\N	DEC AMBER
+24585	\N	DEC MUMPS
+24592	\N	3Com Corporation
+24593	\N	3Com Corporation
+24594	\N	3Com Corporation
+24595	\N	3Com Corporation
+24596	\N	3Com Corporation
+28672	\N	Ungermann-Bass download
+28673	\N	Ungermann-Bass NIUs
+28674	\N	Ungermann-Bass diagnostic/loopback
+28675	\N	Ungermann-Bass ??? (NMC to/from UB Bridge)
+28677	\N	Ungermann-Bass Bridge Spanning Tree
+28679	\N	OS/9 Microware
+28681	\N	OS/9 Net?
+28704	\N	LRT (England) (now Sintrom)
+28705	\N	LRT (England) (now Sintrom)
+28706	\N	LRT (England) (now Sintrom)
+28707	\N	LRT (England) (now Sintrom)
+28708	\N	LRT (England) (now Sintrom)
+28709	\N	LRT (England) (now Sintrom)
+28710	\N	LRT (England) (now Sintrom)
+28711	\N	LRT (England) (now Sintrom)
+28712	\N	LRT (England) (now Sintrom)
+28713	\N	LRT (England) (now Sintrom)
+28720	\N	Racal-Interlan
+28724	\N	Cabletron
+32771	\N	Cronus VLN
+32772	\N	Cronus Direct
+32773	\N	HP Probe protocol
+32774	\N	Nestar
+32776	\N	AT&T/Stanford Univ. Local use
+32784	\N	Excelan
+32787	\N	Silicon Graphics diagnostic
+32788	\N	Silicon Graphics network games
+32789	\N	Silicon Graphics reserved
+32790	\N	Silicon Graphics XNS NameServer, bounce server
+32814	\N	Tymshare
+32815	\N	Tigan, Inc.
+32821	\N	Reverse Address Resolution Protocol (RARP)
+32822	\N	Aeonic Systems
+32824	\N	DEC LanBridge Management
+32825	\N	DEC DSM/DDP
+32826	\N	DEC Argonaut Console
+32827	\N	DEC VAXELN
+32828	\N	DEC DNS Naming Service
+32829	\N	DEC Ethernet CSMA/CD Encryption Protocol
+32830	\N	DEC Distributed Time Service
+32831	\N	DEC LAN Traffic Monitor Protocol
+32832	\N	DEC PATHWORKS DECnet NETBIOS Emulation
+32834	\N	DEC unassigned
+32836	\N	Planning Research Corp.
+32838	\N	AT&T
+32839	\N	AT&T
+32840	\N	DEC Availability Manager for Distributed Systems DECamds (but someone at DEC says not)
+32841	\N	ExperData
+32859	\N	VMTP (Versatile Message Transaction Protocol, RFC-1045) (Stanford) [was Stanford V Kernel, experimental]
+32860	\N	Stanford V Kernel, version 6.0
+32861	\N	Evans & Sutherland
+32864	\N	Little Machines
+32866	\N	Counterpoint Computers
+32869	\N	University of Mass. at Amherst
+32870	\N	University of Mass. at Amherst
+32871	\N	Veeco Integrated Automation
+32872	\N	General Dynamics
+32873	\N	AT&T
+32874	\N	Autophon
+32876	\N	ComDesign
+32877	\N	Compugraphic Corporation
+32878	\N	Landmark Graphics Corporation
+32879	\N	Landmark Graphics Corporation
+32880	\N	Landmark Graphics Corporation
+32881	\N	Landmark Graphics Corporation
+32882	\N	Landmark Graphics Corporation
+32883	\N	Landmark Graphics Corporation
+32884	\N	Landmark Graphics Corporation
+32885	\N	Landmark Graphics Corporation
+32886	\N	Landmark Graphics Corporation
+32887	\N	Landmark Graphics Corporation
+32890	\N	Matra
+32891	\N	Dansk Data Elektronik
+32892	\N	Merit Internodal (or Univ of Michigan?)
+32893	\N	Vitalink Communications
+32894	\N	Vitalink Communications
+32895	\N	Vitalink Communications
+32896	\N	Vitalink TransLAN III Management
+32897	\N	Counterpoint Computers
+32898	\N	Counterpoint Computers
+32899	\N	Counterpoint Computers
+32904	\N	Xyplex
+32905	\N	Xyplex
+32906	\N	Xyplex
+32923	\N	EtherTalk (AppleTalk over Ethernet)
+32924	\N	Datability
+32925	\N	Datability
+32926	\N	Datability
+32927	\N	Spider Systems Ltd.
+32931	\N	Nixdorf Computers
+32932	\N	Siemens Gammasonics Inc.
+32933	\N	Siemens Gammasonics Inc.
+32934	\N	Siemens Gammasonics Inc.
+32935	\N	Siemens Gammasonics Inc.
+32936	\N	Siemens Gammasonics Inc.
+32937	\N	Siemens Gammasonics Inc.
+32938	\N	Siemens Gammasonics Inc.
+32939	\N	Siemens Gammasonics Inc.
+32940	\N	Siemens Gammasonics Inc.
+32941	\N	Siemens Gammasonics Inc.
+32942	\N	Siemens Gammasonics Inc.
+32943	\N	Siemens Gammasonics Inc.
+32944	\N	Siemens Gammasonics Inc.
+32945	\N	Siemens Gammasonics Inc.
+32946	\N	Siemens Gammasonics Inc.
+32947	\N	Siemens Gammasonics Inc.
+32960	\N	DCA (Digital Comm. Assoc.) Data Exchange Cluster
+32961	\N	DCA (Digital Comm. Assoc.) Data Exchange Cluster
+32962	\N	DCA (Digital Comm. Assoc.) Data Exchange Cluster
+32963	\N	DCA (Digital Comm. Assoc.) Data Exchange Cluster
+32966	\N	Pacer Software
+32967	\N	Applitek Corporation
+32968	\N	Intergraph Corporation
+32969	\N	Intergraph Corporation
+32970	\N	Intergraph Corporation
+32971	\N	Intergraph Corporation
+32972	\N	Intergraph Corporation
+32973	\N	Harris Corporation
+32974	\N	Harris Corporation
+32975	\N	Taylor Instrument
+32976	\N	Taylor Instrument
+32977	\N	Taylor Instrument
+32978	\N	Taylor Instrument
+32979	\N	Rosemount Corporation
+32980	\N	Rosemount Corporation
+32981	\N	IBM SNA Services over Ethernet
+32989	\N	Varian Associates
+32990	\N	TRFS (Integrated Solutions Transparent Remote File System)
+32991	\N	TRFS (Integrated Solutions Transparent Remote File System)
+32992	\N	Allen-Bradley
+32993	\N	Allen-Bradley
+32994	\N	Allen-Bradley
+32995	\N	Allen-Bradley
+32996	\N	Datability
+32997	\N	Datability
+32998	\N	Datability
+32999	\N	Datability
+33000	\N	Datability
+33001	\N	Datability
+33002	\N	Datability
+33003	\N	Datability
+33004	\N	Datability
+33005	\N	Datability
+33006	\N	Datability
+33007	\N	Datability
+33008	\N	Datability
+33010	\N	Retix
+33012	\N	Kinetics
+33013	\N	Kinetics
+33015	\N	Apollo Computer
+33023	\N	Wellfleet Communications
+33024	\N	Wellfleet Communications
+33025	\N	Wellfleet Communications
+33026	\N	Wellfleet; BOFL (Breath OF Life) pkts [every 5-10 secs.]
+33027	\N	Wellfleet Communications
+33031	\N	Symbolics Private
+33032	\N	Symbolics Private
+33033	\N	Symbolics Private
+33067	\N	Talaris
+33072	\N	Waterloo Microsystems Inc.
+33073	\N	VG Laboratory Systems
+33079	\N	Novell (old) NetWare IPX (ECONFIG E option)
+33080	\N	Novell, Inc.
+33081	\N	KTI
+33082	\N	KTI
+33083	\N	KTI
+33084	\N	KTI
+33085	\N	KTI
+33087	\N	M/MUMPS data sharing
+33093	\N	Vrije Universiteit (NL) Amoeba 4 RPC (obsolete)
+33094	\N	Vrije Universiteit (NL) FLIP (Fast Local Internet Protocol)
+33095	\N	Vrije Universiteit (NL) [reserved]
+33100	\N	SNMP over Ethernet (see RFC1089)
+33103	\N	Technically Elite Concepts Network Professor
+33169	\N	PowerLAN NetBIOS/NetBEUI (PC)
+33149	\N	XTP
+33238	\N	Artisoft Lantastic
+33239	\N	Artisoft Lantastic
+33283	\N	QNX Software Systems Ltd.
+33284	\N	QNX Software Systems Ltd.
+33285	\N	QNX Software Systems Ltd.
+33680	\N	Accton Technologies (unregistered)
+34091	\N	Talaris multicast
+34178	\N	Kalpana
+34617	\N	Control Technology Inc. RDP Without IP
+34618	\N	Control Technology Inc. Mcast Industrial Ctrl Proto.
+34619	\N	Control Technology Inc. Proprietary
+34620	\N	Control Technology Inc. Proprietary
+34848	\N	Hitachi Cable (Optoelectronic Systems Laboratory)
+34902	\N	Axis Communications AB proprietary bootstrap/config
+34952	\N	HP LanProbe test?
+36865	\N	3Com (Formerly Bridge Communications), XNS Systems Management
+36866	\N	3Com (Formerly Bridge Communications), TCP/IP Systems Management
+36867	\N	3Com (Formerly Bridge Communications), loopback detection
+43690	\N	DECNET? Used by VAX 6220 DEBNI
+64245	\N	Sonix Arpeggio
+65280	\N	BBN VITAL-LanBridge cache wakeups
+2048	ip	DOD Internet Protocol (IP)
+33011	aarp	AppleTalk Address Resolution Protocol (AARP)
+32823	ipx	IPX (Novell Netware?)
+2053	x25	X.25 Level 3
+24579	decnet	DECNET Phase IV, DNA Routing
+34525	ipv6	IP version 6
+24578	mop-rc	DEC Maintenance Operation Protocol (MOP) Remote Console
+24583	lavc	DEC Local Area VAX Cluster (LAVC), System Communication Architecture (SCA)
+32793	domain	Apollo DOMAIN
+28721	prime-nts	Prime NTS (Network Terminal Service)
+24577	mop	DEC Maintenance Operation Protocol (MOP) Dump/Load Assistance
+2054	arp	Address Resolution Protocol (ARP) (for IP and for CHAOS)
+24580	lat	DEC Local Area Transport (LAT)
+32833	last	DEC Local Area System Transport
+36864	loopback	Loopback (Configuration Test Protocol)

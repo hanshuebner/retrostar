@@ -1,0 +1,6 @@
+43ceed9e-ccc7-11ee-afea-960003000da7	bernhard	$2a$06$/dXfPGn7K4scQHaBAy7/IeHS5aFIOukAAAC7TBVIyEhBVLpldCl06	\N	\N
+e7e5ea58-ccd2-11ee-812d-960003000da7	toshi	\N	1531aefcbc4a81dd	2024-02-23 00:00:00
+ca497e10-ccd2-11ee-a685-960003000da7	schroeder	$2a$06$qXsZnBDZNWvGO3YO9chl9e8Puo1EPRebsxYgK7JbpyWxRLFBfZeeG	\N	\N
+f6c43ffc-ccd2-11ee-9d4d-960003000da7	a1000duck	$2a$06$QEc.jGh.e0qRmaufH1mgu.2QPRWolCKlHtIGt8nlYbNM9OKhxLUdi	\N	\N
+dd02f830-ccd5-11ee-bf82-960003000da7	konnexus	$2a$06$8/IUJ.nnft.ozJuKW4SXyOpq59NOFABVCHCTftep12EMCZeKzTFXW	\N	\N
+61b32666-ccc4-11ee-a9d9-960003000da7	hans	$2a$06$PJCW5lC5Mq2Ps8SXbpJ.lOptlialOPObvPPBRGxQI07hzAMSb6eiO	\N	\N

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title><%= page_name; %></title>
+    <link rel="stylesheet" href="styles.css">
+    <% if (typeof user == "object") { %>
+        <link rel="stylesheet" href="event-log.css">
+    <% } %>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <img src="logo.png" alt="Site Logo">
+    </div>
+    <nav>
+        <ul class="menu">
+            <li class="<%= page_name == "status" ? "active" : ""; %>">
+                <a href="status">Status</a>
+            </li>
+            <% if (typeof user == "object") { %>
+                <li class="<%= page_name == "lat" ? "active" : ""; %>">
+                    <a href="lat">LAT Terminal</a>
+                </li>
+                <li class="<%= page_name == "installation" ? "active" : ""; %>">
+                    <a href="installation">Installation</a>
+                </li>
+            <% } %>
+        </ul>
+    </nav>
+    <div class="user">
+        <% if (typeof user == "object") { %>
+            <form action="/logout" method="post">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        <% } else { %>
+                <form action="/auth" method="get">
+                    <button type="submit" class="logout-btn">Login</button>
+                </form>
+        <% } %>
+    </div>
+</header>
+
+<main>
+    <%- content; %>
+</main>
+<footer>
+    <p>&copy; 2024 VzEKC e.V.</p>
+</footer>
+<% if (typeof user == "object") { %>
+    <div id="event-log"></div>
+    <script src="event-log.js"></script>
+<% } %>
+</body>
+</html>

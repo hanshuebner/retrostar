@@ -1,3 +1,5 @@
+### Installation
+
 Hallo <%= user.username %>,
 
 <% if (installKey) { %>
