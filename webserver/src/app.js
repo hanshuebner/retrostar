@@ -63,9 +63,17 @@ const verifyForumLogin = async (
   const claims = uiProfile._json
   const username = claims.nickname.toLowerCase()
   const userId = await db.getUserId(username)
-  if (!userId && !claims.rank?.match(/^(Fördermitglied|Schiedsrichter|Vereinsmitglied|Vorstand|Moderator|Administrator)$/)) {
+  if (
+    !userId &&
+    !claims.rank?.match(
+      /^(Fördermitglied|Schiedsrichter|Vereinsmitglied|Vorstand|Moderator|Administrator)$/
+    )
+  ) {
     console.log('unauthorized forum user', username, claims.rank)
-    return verified(null, false, { message: "Dieses System ist nur für Mitglieder des VzEkC e.V. zugänglich." })
+    return verified(null, false, {
+      message:
+        'Dieses System ist nur für Mitglieder des VzEkC e.V. zugänglich.',
+    })
   }
   event.publish(
     'web-login',
@@ -90,13 +98,7 @@ passport.use(
       authorizationURL: process.env.OIDC_AUTHORIZATION_URL,
       tokenURL: process.env.OIDC_TOKEN_URL,
       userInfoURL: process.env.OIDC_USERINFO_URL,
-      scope: [
-        'openid',
-        'nickname',
-        'email',
-        'rank',
-        'profile',
-      ],
+      scope: ['openid', 'nickname', 'email', 'rank', 'profile'],
     },
     verifyForumLogin
   )
@@ -207,17 +209,27 @@ router.get('/status', async (ctx, next) => {
 })
 
 const getLatServices = async () => {
-  const { stdout } = await exec('llogin -d')
-  return stdout
-    .trim()
-    .split('\n')
-    .map((line) => {
-      const [_, name, status, description] = line.match(
-        /^(\S+)\s+(\S+)\s+(.*)$/
-      )
-      return { name, status, description }
-    })
-    .filter(({ status }) => status === 'Available')
+  try {
+    const { stdout } = await exec('llogin -d')
+    return stdout
+      .trim()
+      .split('\n')
+      .map((line) => {
+        const [_, name, status, description] = line.match(
+          /^(\S+)\s+(\S+)\s+(.*)$/
+        )
+        return { name, status, description }
+      })
+      .filter(({ status }) => status === 'Available')
+  } catch (e) {
+    return [
+      {
+        name: 'dummy',
+        status: 'Available',
+        description: 'llogin is not installed',
+      },
+    ]
+  }
 }
 
 router.get('/lat', async (ctx, next) => {
@@ -380,7 +392,10 @@ router.post('/auth/set-password', async (ctx, next) => {
 // Logout route
 router.post('/logout', (ctx) => {
   if (ctx.state?.user?.username) {
-    event.publish('web-logout', `${ctx.state.user.username} hat sich vom Webserver abgemeldet`)
+    event.publish(
+      'web-logout',
+      `${ctx.state.user.username} hat sich vom Webserver abgemeldet`
+    )
   }
   ctx.logout(() => ctx.redirect('/'))
 })
@@ -429,7 +444,7 @@ app.ws.use(
       await event.publish(
         'lat-connect',
         `${username} hat die LAT-Verbindung zu ${host} beendet`,
-         { username, host }
+        { username, host }
       )
       setInterval(() => ctx.websocket.close(), 5000)
     })
