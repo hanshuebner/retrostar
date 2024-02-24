@@ -18,10 +18,10 @@
         </div>
         <nav class="mainNav">
             <ul class="menu">
+                <li class="<%= page_name == "status" ? "active" : ""; %>">
+                    <a href="status">Status</a>
+                </li>
                 <% if (typeof user == "object") { %>
-                    <li class="<%= page_name == "status" ? "active" : ""; %>">
-                        <a href="status">Home</a>
-                    </li>
                     <li class="<%= page_name == "lat" ? "active" : ""; %>">
                         <a href="lat">LAT Terminal</a>
                     </li>
@@ -29,6 +29,9 @@
                         <a href="installation">Installation</a>
                     </li>
                 <% } %>
+                <li class="<%= page_name == "about" ? "active" : ""; %>">
+                    <a href="about">Über Retrostar</a>
+                </li>
             </ul>
         </nav>
     </div>
