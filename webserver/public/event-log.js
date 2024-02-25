@@ -40,9 +40,9 @@ const initEventLog = () => {
       ? 'block'
       : 'none'
     if (visible) {
-      localStorage.removeItem('eventLogHidden')
+      localStorage.setItem('eventLogVisible', 'true')
     } else {
-      localStorage.setItem('eventLogHidden', 'true')
+      localStorage.removeItem('eventLogVisible')
     }
   }
 
@@ -54,7 +54,7 @@ const initEventLog = () => {
     .getElementById('event-log-icon')
     .addEventListener('click', () => setEventLogVisibility(true))
 
-  setEventLogVisibility(localStorage.getItem('eventLogHidden') !== 'true')
+  setEventLogVisibility(localStorage.getItem('eventLogVisible') === 'true')
 }
 
 window.addEventListener('load', initEventLog)
