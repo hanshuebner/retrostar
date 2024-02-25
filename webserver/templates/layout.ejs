@@ -69,8 +69,11 @@
     <p>&copy; 2024 VzEKC e.V.</p>
 </footer>
 <% if (typeof user == "object") { %>
-    <div id="event-log"></div>
-    <script src="event-log.js"></script>
+    <div id="event-log-container">
+        <div id="event-log"></div>
+        <img id="event-log-icon" src="log.svg" width="40" height="40"/>
+        <script src="event-log.js"></script>
+    </div>
 <% } %>
 </body>
 </html>

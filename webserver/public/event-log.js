@@ -1,10 +1,10 @@
-const formatEvent = event => {
-  const timestamp = new Date(event.timestamp);
-  const date = timestamp.toLocaleDateString('de-DE');
-  const time = timestamp.toLocaleTimeString('de-DE', { hour12: false });
+const formatEvent = (event) => {
+  const timestamp = new Date(event.timestamp)
+  const date = timestamp.toLocaleDateString('de-DE')
+  const time = timestamp.toLocaleTimeString('de-DE', { hour12: false })
 
-  return `${date} ${time}: ${event.message}`;
-};
+  return `${date} ${time}: ${event.message}`
+}
 
 const addLog = (event) => {
   const eventLog = document.getElementById('event-log')
@@ -30,7 +30,31 @@ const initEventLog = () => {
     }
   }, 2000)
 
-    socket.onmessage = (event) => addLog(JSON.parse(event.data))
+  socket.onmessage = (event) => addLog(JSON.parse(event.data))
+
+  const setEventLogVisibility = (visible) => {
+    document.getElementById('event-log-icon').style.display = visible
+      ? 'none'
+      : 'block'
+    document.getElementById('event-log').style.display = visible
+      ? 'block'
+      : 'none'
+    if (visible) {
+      localStorage.removeItem('eventLogHidden')
+    } else {
+      localStorage.setItem('eventLogHidden', 'true')
+    }
+  }
+
+  document
+    .getElementById('event-log')
+    .addEventListener('click', () => setEventLogVisibility(false))
+
+  document
+    .getElementById('event-log-icon')
+    .addEventListener('click', () => setEventLogVisibility(true))
+
+  setEventLogVisibility(localStorage.getItem('eventLogHidden') !== 'true')
 }
 
 window.addEventListener('load', initEventLog)

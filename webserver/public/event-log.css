@@ -1,7 +1,10 @@
-#event-log {
+#event-log-container {
     position: fixed;
-    bottom: 4;
-    right: 4;
+    bottom: 4px;
+    right: 4px;
+}
+
+#event-log {
     width: 680px;
     max-height: 150px;
     max-height: 30%;
@@ -13,4 +16,8 @@
     margin: 4px;
     z-index: 1000;
     font-size: 80%;
+    display: none;
+}
+
+#event-log-icon {
 }
