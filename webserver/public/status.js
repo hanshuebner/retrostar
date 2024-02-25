@@ -34,6 +34,20 @@ const init = () => {
       handleKeyDown(event, element, macAddress)
     )
   })
+  document
+    .querySelectorAll('td[data-own-mac-address=true]')
+    .forEach((element) => {
+      element.addEventListener('click', async () => {
+        let { macAddress, blacklisted } = element.parentNode.dataset
+        blacklisted = blacklisted === 'true'
+        await fetch(`/api/host/${macAddress}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ blacklisted: !blacklisted }),
+        })
+        element.parentElement.setAttribute('data-blacklisted', !blacklisted)
+      })
+    })
 }
 
 window.addEventListener('load', init)

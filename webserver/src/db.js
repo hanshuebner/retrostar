@@ -121,7 +121,6 @@ const getActiveHosts = async () =>
                 JOIN "user" u ON u.id = h.user_id
        WHERE h.last_seen > NOW() - INTERVAL \'5 minutes\'
          AND h.protocols IS NOT NULL
-         AND NOT blacklisted
        ORDER BY u.name, h.mac_address::VARCHAR`
     )
     return result.rows
@@ -141,7 +140,7 @@ const getAllHosts = async () =>
 const updateHost = async (
   username,
   macAddress,
-  { name, description, hardware, software }
+  { name, description, hardware, software, blacklisted }
 ) =>
   withClient(async (client) => {
     const result = await client.query(
@@ -149,12 +148,13 @@ const updateHost = async (
        SET name        = COALESCE($3, name),
            description = COALESCE($4, description),
            hardware    = COALESCE($5, hardware),
-           software    = COALESCE($6, software)
+           software    = COALESCE($6, software),
+           blacklisted = COALESCE($7, blacklisted)
        WHERE mac_address = $1
          AND user_id = (SELECT id
                         FROM "user"
                         WHERE name = $2);`,
-      [macAddress, username, name, description, hardware, software]
+      [macAddress, username, name, description, hardware, software, blacklisted]
     )
     return result.rows
   })

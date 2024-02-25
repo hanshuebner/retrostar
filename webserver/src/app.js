@@ -312,6 +312,7 @@ const validateHostUpdateSchema = new Ajv().compile({
     description: { type: 'string' },
     hardware: { type: 'string' },
     software: { type: 'string' },
+    blacklisted: { type: 'boolean' },
   },
   additionalProperties: false,
 })

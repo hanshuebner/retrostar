@@ -32,3 +32,15 @@ td[contenteditable="true"] {
     background-position: right center;
     padding-right: 30px;
 }
+
+td[data-own-mac-address="true"] {
+    background-image: url('eye.png');
+    background-repeat: no-repeat;
+    background-size: auto 50%;
+    background-position: right center;
+    padding-right: 30px;
+}
+
+tr[data-blacklisted="true"] {
+    text-decoration: line-through;
+}

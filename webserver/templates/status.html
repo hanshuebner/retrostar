@@ -14,14 +14,17 @@
   </thead>
   <tbody>
   <% for (let i = 0; i < hosts.length; i++) { const host = hosts[i] %>
-    <tr data-mac-address="<%= host.mac_address %>">
-      <td data-field="name" contenteditable="<%= host.editable %>"><%= host.name %></td>
-      <td><%= host.mac_address %></td>
-      <td data-field="hardware" contenteditable="<%= host.editable %>"><%= host.hardware %></td>
-      <td data-field="software" contenteditable="<%= host.editable %>"><%= host.software %></td>
-      <td><%- host.protocols?.map(({ name, description}) => `<span title="${description}" class="protocol">${name}</span>`).join(' ') %></td>
-      <td><%= host.owner %></td>
-    </tr>
+  <% if (host.editable || !host.blacklisted) { %>
+  <tr data-mac-address="<%= host.mac_address %>" data-blacklisted="<%= host.blacklisted %>">
+    <td data-field="name" contenteditable="<%= host.editable %>"><%= host.name %></td>
+    <td data-own-mac-address="<%= host.editable %>"><%= host.mac_address %></td>
+    <td data-field="hardware" contenteditable="<%= host.editable %>"><%= host.hardware %></td>
+    <td data-field="software" contenteditable="<%= host.editable %>"><%= host.software %></td>
+    <td><%- host.protocols?.map(({ name, description}) => `<span title="${description}" class="protocol">${name}</span>`).join(' ') %>
+    </td>
+    <td><%= host.owner %></td>
+  </tr>
+  <% } %>
   <% } %>
   </tbody>
 </table>
@@ -38,6 +41,9 @@
   Du in eines mit einem Stift <img src="pencil.png" height="15"/> gekennzeichneten Felder
   klickst.  Änderungen werden gespeichert, sobald Du ENTER drückst oder das
   Feld verlässt.
+  Durch Klick auf das Auge <img src="eye.png" height="15"/> kannst Du einen Host
+  für andere Benutzer unsichtbar machen.  Ein weiterer Klick macht ihn wieder
+  sichtbar.
 </p>
 <% } %>
 <script src="status.js"></script>
