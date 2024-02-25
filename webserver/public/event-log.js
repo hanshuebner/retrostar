@@ -41,6 +41,7 @@ const initEventLog = () => {
       : 'none'
     if (visible) {
       localStorage.setItem('eventLogVisible', 'true')
+      eventLog.scrollTop = eventLog.scrollHeight
     } else {
       localStorage.removeItem('eventLogVisible')
     }
