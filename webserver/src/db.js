@@ -121,6 +121,7 @@ const getActiveHosts = async () =>
                 JOIN "user" u ON u.id = h.user_id
        WHERE h.last_seen > NOW() - INTERVAL \'5 minutes\'
          AND h.protocols IS NOT NULL
+         AND NOT blacklisted
        ORDER BY u.name, h.mac_address::VARCHAR`
     )
     return result.rows
