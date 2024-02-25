@@ -33,12 +33,10 @@ const initEventLog = () => {
   socket.onmessage = (event) => addLog(JSON.parse(event.data))
 
   const setEventLogVisibility = (visible) => {
-    document.getElementById('event-log-icon').style.display = visible
-      ? 'none'
-      : 'block'
-    document.getElementById('event-log').style.display = visible
-      ? 'block'
-      : 'none'
+    const eventLogIcon = document.getElementById('event-log-icon')
+    eventLogIcon.style.display = visible ? 'none' : 'block'
+    const eventLog = document.getElementById('event-log')
+    eventLog.style.display = visible ? 'block' : 'none'
     if (visible) {
       localStorage.setItem('eventLogVisible', 'true')
       eventLog.scrollTop = eventLog.scrollHeight
