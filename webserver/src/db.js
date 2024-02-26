@@ -116,9 +116,10 @@ const touchHosts = async (usersAndHosts) =>
 const getActiveHosts = async () =>
   withClient(async (client) => {
     const result = await client.query(
-      `SELECT h.*, u.name AS owner
+      `SELECT h.*, u.name AS owner, ev.vendor
        FROM host h
                 JOIN "user" u ON u.id = h.user_id
+                LEFT OUTER JOIN ethernet_vendor ev ON (h.mac_address & 'ff:ff:ff:00:00:00'::macaddr) = ev.mac_prefix
        WHERE h.last_seen > NOW() - INTERVAL \'5 minutes\'
          AND h.protocols IS NOT NULL
        ORDER BY u.name, h.mac_address::VARCHAR`

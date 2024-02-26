@@ -17,7 +17,7 @@
   <% if (host.editable || !host.blacklisted) { %>
   <tr data-mac-address="<%= host.mac_address %>" data-blacklisted="<%= host.blacklisted %>">
     <td data-field="name" contenteditable="<%= host.editable %>"><%= host.name %></td>
-    <td data-own-mac-address="<%= host.editable %>"><%= host.mac_address %></td>
+    <td data-own-mac-address="<%= host.editable %>" title="<%= host.vendor %>"><%= host.mac_address %></td>
     <td data-field="hardware" contenteditable="<%= host.editable %>"><%= host.hardware %></td>
     <td data-field="software" contenteditable="<%= host.editable %>"><%= host.software %></td>
     <td><%- host.protocols?.map(({ name, description}) => `<span title="${description}" class="protocol">${name}</span>`).join(' ') %>
