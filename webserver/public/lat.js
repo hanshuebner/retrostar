@@ -20,6 +20,10 @@ const connect = (host) => {
     rows: 24,
   })
 
+  term.parser.registerCsiHandler({ final: 'c' }, (params) => {
+    socket.send('\x1b[?1c') // terminal is VT100
+    return true
+  })
   term.open(document.getElementById('terminal'))
   term.onKey((keyObj) => socket.send(keyObj.key))
 }
