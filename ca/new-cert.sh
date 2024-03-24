@@ -4,11 +4,12 @@ set -e
 
 if [ -z "$1" ]
 then
-    echo "usage: $0 <client-name>" 2>&1
+    echo "usage: $0 <owner> [<client-name>]" 2>&1
     exit 1
 fi
 
-client_name=$1
+owner=$1
+client_name=${2:-$owner}
 
 SCRIPT_DIR=$(dirname "$0")
 cd "$SCRIPT_DIR"
@@ -30,5 +31,5 @@ echo Generating key
 openssl req -new -newkey rsa:2048 -nodes -keyout "$OUTPUT_KEY" -out "$OUTPUT_CSR" -subj "/CN=$client_name"
 echo Generating cert
 openssl ca -config "$CA_CONF" -batch -in "$OUTPUT_CSR" -out "$OUTPUT_CERT" -notext
-./import-cert.sh "$client_name" "$OUTPUT_CERT" "$OUTPUT_KEY"
+./import-cert.sh "$owner" "$client_name" "$OUTPUT_CERT" "$OUTPUT_KEY"
 rm "$OUTPUT_CSR"

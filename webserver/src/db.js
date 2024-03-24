@@ -44,13 +44,13 @@ const getConfigurationByInstallKey = async (client, installKey) => {
   return result.rows[0]
 }
 
-const getInstallKeyByUser = async (client, username) => {
+const getInstallKeysByUser = async (client, username) => {
   const result = await client.query(
-    'SELECT oc.install_key FROM "user" u JOIN openvpn_configuration oc ON oc.user_id = u.id WHERE u.name = $1 LIMIT 1',
+    'SELECT oc.install_key, oc.config_name FROM "user" u JOIN openvpn_configuration oc ON oc.user_id = u.id WHERE u.name = $1',
     [username]
   )
 
-  return result.rows[0]?.install_key
+  return result.rows
 }
 
 const checkPassword = async (username, password) =>
@@ -202,7 +202,7 @@ module.exports = {
   withClient,
   middleware,
   getConfigurationByInstallKey,
-  getInstallKeyByUser,
+  getInstallKeysByUser,
   checkPassword,
   checkPasswordResetKey,
   resetPassword,

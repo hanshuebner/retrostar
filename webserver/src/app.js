@@ -185,11 +185,14 @@ const markdownOptions = {
 router.get('/installation', isAuthenticated, async (ctx, next) => {
   const username = ctx.state.user.username
 
-  if (process.env.ENVIRONMENT === 'production') {
-    ctx.state.installKey = await db.getInstallKeyByUser(ctx.db, username)
-  } else {
-    ctx.state.installKey = 'XXXX-XXXX'
+  ctx.state.installKeys = await db.getInstallKeysByUser(ctx.db, username)
+  if (
+    process.env.ENVIRONMENT !== 'production' &&
+    ctx.state.installKeys.length === 0
+  ) {
+    ctx.state.installKeys = ['XXXX-XXXX']
   }
+  ctx.state.installKey = ctx.state.installKeys[0]?.install_key
 
   await next()
 })
