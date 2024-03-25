@@ -1,10 +1,48 @@
 const { spawn } = require('child_process')
 const db = require('./db')
 
+class ExpiringSet {
+  constructor(entries = []) {
+    this.set = new Map()
+    entries?.forEach((entry) => this.add(entry))
+  }
+
+  add(value) {
+    this.set.set(value, Date.now())
+  }
+
+  has(value) {
+    if (!this.set.has(value)) {
+      return false
+    }
+
+    if (Date.now() - this.set.get(value) > 600000) {
+      this.set.delete(value)
+      return false
+    }
+
+    return true
+  }
+
+  delete(value) {
+    return this.set.delete(value)
+  }
+
+  getEntries() {
+    const now = Date.now()
+    for (const [key, value] of this.set) {
+      if (now - value > 600000) {
+        this.set.delete(key)
+      }
+    }
+    return Array.from(this.set.keys())
+  }
+}
+
 const loadHostProtocols = async () =>
   (await db.getAllHosts()).reduce(
     (hostProtocols, { mac_address, protocols }) => {
-      hostProtocols[mac_address] = new Set(protocols)
+      hostProtocols[mac_address] = new ExpiringSet(protocols)
       return hostProtocols
     },
     {}
@@ -18,9 +56,9 @@ const handlePacket = async (hosts, mac_address, protocolHex) => {
   const protocol = parseInt(protocolHex, 16)
   if (hosts[mac_address]) {
     if (!hosts[mac_address].has(protocol)) {
-        console.log(`Adding protocol ${protocolHex} to ${mac_address}`)
-        hosts[mac_address].add(protocol)
-        await db.updateHostProtocols(mac_address, Array.from(hosts[mac_address]))
+      console.log(`Adding protocol ${protocolHex} to ${mac_address}`)
+      hosts[mac_address].add(protocol)
+      await db.updateHostProtocols(mac_address, hosts[mac_address].getEntries())
     }
   } else {
     console.log(`Unknown MAC address: ${mac_address}`)
@@ -50,7 +88,9 @@ const protoMon = async () => {
         const match = line?.match(/ (.*) > .*, ethertype .*? \(0x(....)\)/)
         if (match) {
           const [_, mac_address, protocol] = match
-          handlePacket(hosts, mac_address, protocol).then((newHosts) => hosts = newHosts)
+          handlePacket(hosts, mac_address, protocol).then(
+            (newHosts) => (hosts = newHosts)
+          )
         }
       })
   )
