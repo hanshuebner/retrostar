@@ -1,0 +1,14 @@
+<link href="quill/quill.snow.css" rel="stylesheet">
+<script src="quill/quill.js"></script>
+
+<div id="editor">
+  <!-- The Quill editor will be instantiated here -->
+</div>
+
+<form id="article-form" method="post" action="/api/article">
+  <input type="hidden" name="content" id="content">
+  <button type="submit">Save</button>
+</form>
+
+<script src="article.js">
+</script>

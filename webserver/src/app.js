@@ -487,7 +487,8 @@ router.post('/api/image/:article', isAuthenticated, async (ctx) => {
     [article, name, imageData, mimeType]
   )
 
-  ctx.status = 201
+  ctx.status = 200
+  ctx.body = { url: `/api/image/${article}/${name}` }
 })
 
 router.get('/api/image/:article/:name', async (ctx) => {

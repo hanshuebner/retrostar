@@ -3,8 +3,8 @@ const { expect } = require('chai')
 const app = require('../src/app')
 const path = require('node:path')
 
-const server = app.callback() // Create a server from the Koa app
-const request = supertest.agent(server) // Use the server with supertest
+const server = app.callback()
+const request = supertest.agent(server)
 
 describe('Article and Image CRUD Test', () => {
   let articleId
@@ -37,7 +37,8 @@ describe('Article and Image CRUD Test', () => {
       .post(`/api/image/${articleId}`)
       .attach('image', filePath)
 
-    expect(response.status).to.equal(201)
+    expect(response.status).to.equal(200)
+    expect(response.body).to.have.property('url')
   })
 
   it('should delete the uploaded image', async () => {
@@ -61,7 +62,7 @@ describe('Article and Image CRUD Test', () => {
       .post(`/api/image/${articleId}`)
       .attach('image', filePath)
 
-    expect(response.status).to.equal(201)
+    expect(response.status).to.equal(200)
   })
 
   it('should delete the article', async () => {
