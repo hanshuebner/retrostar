@@ -1,4 +1,19 @@
-const imageHandler = () => {
+const quill = new Quill('#editor', {
+  modules: {
+    toolbar: [
+      [{ header: [1, 2, false] }],
+      ['bold', 'italic', 'underline'],
+      ['link', 'image', 'code-block'],
+    ],
+    imageDropAndPaste: {
+      // add an custom image handler
+      handler: (a) => console.log('image pasted: ', a),
+    },
+  },
+  theme: 'snow',
+})
+
+const uploadImage = () => {
   let fileInput = document.createElement('input')
   fileInput.setAttribute('type', 'file')
   fileInput.click()
@@ -21,22 +36,7 @@ const imageHandler = () => {
   }
 }
 
-const quill = new Quill('#editor', {
-  modules: {
-    toolbar: [
-      [{ header: [1, 2, false] }],
-      ['bold', 'italic', 'underline'],
-      ['link', 'image', 'code-block'],
-    ],
-    imageDropAndPaste: {
-      // add an custom image handler
-      handler: imageHandler,
-    },
-  },
-  theme: 'snow',
-})
-
-quill.getModule('toolbar').addHandler('image', imageHandler)
+quill.getModule('toolbar').addHandler('image', uploadImage)
 
 // When the form is submitted, populate the hidden field with the editor content
 document.querySelector('#article-form').onsubmit = function () {
