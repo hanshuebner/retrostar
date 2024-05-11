@@ -6,7 +6,7 @@ const ejs = require('ejs')
 const Koa = require('koa')
 const Router = require('koa-router')
 const route = require('koa-route')
-const bodyParser = require('koa-bodyparser')
+const { koaBody } = require('koa-body')
 const koaStatic = require('koa-static')
 const session = require('koa-session')
 const websockify = require('koa-websocket')
@@ -17,7 +17,6 @@ const passport = require('koa-passport')
 const OIDCStrategy = require('passport-openidconnect').Strategy
 const db = require('./db')
 const event = require('./event')
-const bridgeInfo = require('./bridgeInfo')
 
 const app = websockify(new Koa())
 const router = new Router()
@@ -30,7 +29,7 @@ const resolvePath = (...components) => path.join(__dirname, '..', ...components)
 const readFileSync = (...components) =>
   fs.readFileSync(resolvePath(...components), { encoding: 'utf8' })
 
-app.use(bodyParser())
+app.use(koaBody({ multipart: true }))
 app.use(koaStatic(resolvePath('public')))
 
 // Session middleware
@@ -75,7 +74,7 @@ const verifyForumLogin = async (
         'Dieses System ist nur für Mitglieder des VzEkC e.V. zugänglich.',
     })
   }
-  event.publish(
+  await event.publish(
     'web-login',
     `${username} hat sich über das Forum auf dem Webserver angemeldet.`,
     { username }
@@ -159,7 +158,7 @@ const renderTemplateFile = (filename, state, data) =>
 router.get('/client-config/:installKey', async (ctx) => {
   const installKey = ctx.params.installKey?.toUpperCase()
   const configuration = await db.getConfigurationByInstallKey(
-    ctx.db,
+    ctx.state.db,
     installKey
   )
 
@@ -185,7 +184,7 @@ const markdownOptions = {
 router.get('/installation', isAuthenticated, async (ctx, next) => {
   const username = ctx.state.user.username
 
-  ctx.state.installKeys = await db.getInstallKeysByUser(ctx.db, username)
+  ctx.state.installKeys = await db.getInstallKeysByUser(ctx.state.db, username)
   if (
     process.env.ENVIRONMENT !== 'production' &&
     ctx.state.installKeys.length === 0
@@ -358,7 +357,7 @@ router.post('/auth/login', async (ctx, next) => {
 
   if (username && password) {
     // Attempt Local authentication
-    await passport.authenticate('local', async (err, user, info) => {
+    await passport.authenticate('local', async (err, user) => {
       if (err) {
         ctx.status = 500
         ctx.body = 'Internal Server Error'
@@ -372,7 +371,7 @@ router.post('/auth/login', async (ctx, next) => {
         // If Local authentication succeeds, log in the user
         await ctx.login(user)
         ctx.redirect(ctx.request.query.path || '/')
-        event.publish(
+        await event.publish(
           'web-login',
           `${username} hat sich auf dem Webserver angemeldet.`,
           { username }
@@ -385,7 +384,7 @@ router.post('/auth/login', async (ctx, next) => {
   }
 })
 
-router.post('/auth/set-password', async (ctx, next) => {
+router.post('/auth/set-password', async (ctx) => {
   if (ctx.request.body.key) {
     await db.resetPassword(ctx.request.body.key, ctx.request.body.password)
   } else if (ctx.state.user) {
@@ -406,6 +405,130 @@ router.post('/logout', (ctx) => {
     )
   }
   ctx.logout(() => ctx.redirect('/'))
+})
+
+// Article upload/download
+router.post('/api/article', isAuthenticated, async (ctx) => {
+  const { content } = ctx.request.body
+  const client = ctx.state.db
+
+  const result = await client.query(
+    `INSERT INTO article (content)
+     VALUES ($1)
+     RETURNING id`,
+    [content]
+  )
+
+  ctx.body = { id: result.rows[0].id }
+  ctx.status = 201
+})
+
+router.get('/api/article/:id', async (ctx) => {
+  const { id } = ctx.params
+  const client = ctx.state.db
+
+  const result = await client.query(
+    `SELECT *
+     FROM article
+     WHERE id = $1`,
+    [id]
+  )
+
+  if (result.rows.length > 0) {
+    ctx.body = result.rows[0]
+  } else {
+    ctx.status = 404
+    ctx.body = 'Article not found'
+  }
+})
+
+router.put('/api/article/:id', isAuthenticated, async (ctx) => {
+  const { id } = ctx.params
+  const { content } = ctx.request.body
+  const client = ctx.state.db
+
+  await client.query(
+    `UPDATE article
+     SET content = $1
+     WHERE id = $2`,
+    [content, id]
+  )
+
+  ctx.status = 204
+})
+
+router.delete('/api/article/:id', isAuthenticated, async (ctx) => {
+  const { id } = ctx.params
+  const client = ctx.state.db
+
+  await client.query(
+    `DELETE
+     FROM article
+     WHERE id = $1`,
+    [id]
+  )
+  ctx.status = 204
+})
+
+// Image upload/download
+
+router.post('/api/image/:article', isAuthenticated, async (ctx) => {
+  const client = ctx.state.db
+  const { article } = ctx.params
+  const file = ctx.request.files.image
+
+  const imageData = fs.readFileSync(file.filepath)
+  const mimeType = file.mimetype
+  const name = file.originalFilename
+
+  await client.query(
+    `INSERT INTO image (article, name, data, mime_type)
+     VALUES ($1, $2, $3, $4)`,
+    [article, name, imageData, mimeType]
+  )
+
+  ctx.status = 201
+})
+
+router.get('/api/image/:article/:name', async (ctx) => {
+  const client = ctx.state.db
+  const { article, name } = ctx.params
+  const result = await client.query(
+    `SELECT data, mime_type
+     FROM image
+     WHERE article = $1
+       AND name = $2`,
+    [article, name]
+  )
+
+  if (result.rows.length > 0) {
+    const { data, mime_type } = result.rows[0]
+    ctx.type = mime_type
+    ctx.body = data
+  } else {
+    ctx.status = 404
+    ctx.body = 'Image not found'
+  }
+})
+
+router.delete('/api/image/:article/:name', isAuthenticated, async (ctx) => {
+  const client = ctx.state.db
+  const { article, name } = ctx.params
+
+  const result = await client.query(
+    `DELETE
+     FROM image
+     WHERE article = $1
+       AND name = $2`,
+    [article, name]
+  )
+
+  if (result.rowCount > 0) {
+    ctx.status = 204
+  } else {
+    ctx.status = 404
+    ctx.body = 'Image not found'
+  }
 })
 
 // WebSocket route
@@ -495,11 +618,4 @@ app.ws.use(
 app.use(router.routes())
 app.use(router.allowedMethods())
 
-bridgeInfo.startHostUpdater()
-
-const port = process.env.PORT || 3000
-
-app.listen(port, async () => {
-  console.log(`Server running on port ${port}`)
-  event.publish('server-start', 'Der Webserver wurde gestartet')
-})
+module.exports = app

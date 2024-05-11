@@ -4,8 +4,8 @@
   "description": "Koa web server with GitHub OAuth2 authentication",
   "main": "index.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
     "test": "mocha",
     "format": "prettier --write \"src/**/*.js\""
   },
@@ -16,7 +16,7 @@
     "dotenv": "^16.4.2",
     "ejs": "^3.1.9",
     "koa": "^2.13.0",
-    "koa-bodyparser": "^4.4.1",
+    "koa-body": "^6.0.1",
     "koa-passport": "^5.0.0",
     "koa-route": "^3.2.0",
     "koa-router": "^10.0.0",

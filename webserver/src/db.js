@@ -31,7 +31,7 @@ const withClient = async (handler) => {
 
 const middleware = async (ctx, next) =>
   withClient(async (client) => {
-    ctx.db = client
+    ctx.state.db = client
     await next()
   })
 
