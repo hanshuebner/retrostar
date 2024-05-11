@@ -6,6 +6,7 @@
 # https://github.com/Schniz/migrate.sh/edit/master/migrate.sh
 
 set -e
+cd "$(dirname "$0")"
 
 function check_env() {
     if [ -z "$PGDATABASE" ]
@@ -17,15 +18,15 @@ function check_env() {
 
 function make_new_migration() {
   FILE_DESC=$(echo $@ | sed -E "s/[[:space:]]+/_/g" | awk '{print tolower($0)}')
-  FILE_PATH=db/migrations/$(get_timestamp)_${FILE_DESC}.sql
-  mkdir -p db/migrations
+  FILE_PATH=migrations/$(get_timestamp)_${FILE_DESC}.sql
+  mkdir -p migrations
   touch $FILE_PATH
   echo "  --> touched $FILE_PATH"
 }
 
 function pending_migrations() {
   UP_MIGRATIONS=$(bash -c 'psql -t -c "select filename from public.migrations" | sed "s@[[:space:]]@@g" | grep . | cat' 2> /dev/null)
-  ALL_MIGRATIONS=$(bash -c 'cd db/migrations && ls *.sql')
+  ALL_MIGRATIONS=$(bash -c 'cd migrations && ls *.sql')
   STRINGIFIED_MIGRATIONS=" ${ALL_MIGRATIONS[*]} "
   for item in ${UP_MIGRATIONS[@]}; do
     STRINGIFIED_MIGRATIONS=${STRINGIFIED_MIGRATIONS/${item}/ }
@@ -48,7 +49,7 @@ function run_migrations() {
      do
       echo "  --> Running $PENDING_MIGRATION"
          (
-           cat db/migrations/$PENDING_MIGRATION
+           cat migrations/$PENDING_MIGRATION
            echo "insert into public.migrations (filename) values ('$(basename $PENDING_MIGRATION)');"
          ) | psql -1
       psql -1 <<< $CONTENTS_WITH_MIGRATION_RESULT
@@ -63,10 +64,10 @@ function dump_schema() {
   createdb $PGDATABASE
   reset_db
   run_migrations
-  pg_dump -xO --inserts | grep -v -e "---\?\( .\+\)\$" | grep -v -e "^--\$" | grep -v -e "^\$" > db/schema.sql
+  pg_dump -xO --inserts | grep -v -e "---\?\( .\+\)\$" | grep -v -e "^--\$" | grep -v -e "^\$" > schema.sql
   dropdb $PGDATABASE
 
-  echo "  --> Wrote db/schema.sql"
+  echo "  --> Wrote schema.sql"
 }
 
 function reset_db() {
@@ -106,7 +107,7 @@ function main_migrate() {
       ;;
     schema:load)
       check_env
-      psql -f db/schema.sql
+      psql -f schema.sql
       ;;
     danger:reset)
       check_env

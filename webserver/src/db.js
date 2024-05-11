@@ -12,6 +12,8 @@ const pool = new Pool({
 
 const connect = async () => pool.connect()
 
+const closePool = async () => pool.end()
+
 // Middleware function to allocate PostgreSQL database connection and manage transactions
 const withClient = async (handler) => {
   const client = await connect()
@@ -199,6 +201,7 @@ const getUserId = async (username) =>
 
 module.exports = {
   connect,
+  closePool,
   withClient,
   middleware,
   getConfigurationByInstallKey,
