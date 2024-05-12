@@ -31,7 +31,9 @@
     <td><%= host.owner %></td>
   </tr>
 </table>
+<% if (editable || host.description) { %>
 <h4>Systembeschreibung</h4>
 <div id="editor" data-editable="<%= !!editable %>"><%- host.description %></div>
 <button id="save" disabled>Speichern</button>
+<% } %>
 <script src="/hostinfo.js"></script>
