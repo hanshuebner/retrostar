@@ -1,5 +1,6 @@
+const macAddress = window.location.pathname.split('/')[2]
+
 const initCatalogEntryEditor = async () => {
-  const macAddress = window.location.pathname.split('/')[2]
   const editable =
     document.getElementById('editor').getAttribute('data-editable') === 'true'
 
@@ -69,7 +70,6 @@ const handleKeyDown = async (event, element, macAddress) => {
 
 const initDirectEditingFields = async () => {
   document.querySelectorAll('td[contenteditable=true]').forEach((element) => {
-    const macAddress = window.location.pathname.split('/')[2]
     element.dataset.oldContent = element.textContent.trim()
     element.addEventListener('focus', () =>
       element.classList.remove('save-success', 'save-failure')
@@ -80,17 +80,13 @@ const initDirectEditingFields = async () => {
     )
   })
   document
-    .querySelectorAll('td[data-own-mac-address=true]')
-    .forEach((element) => {
-      element.addEventListener('click', async () => {
-        let { macAddress, blacklisted } = element.parentNode.dataset
-        blacklisted = blacklisted === 'true'
-        await fetch(`/api/host/${macAddress}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ blacklisted: !blacklisted }),
-        })
-        element.parentElement.setAttribute('data-blacklisted', !blacklisted)
+    .getElementById('blacklisted')
+    .addEventListener('click', async (e) => {
+      const blacklisted = e.target.checked
+      await fetch(`/api/host/${macAddress}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blacklisted }),
       })
     })
 }
