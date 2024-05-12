@@ -1,6 +1,7 @@
 require('dotenv').config() // Load environment variables from .env file
 
 const fs = require('fs')
+const crypto = require('crypto')
 const marked = require('marked')
 const ejs = require('ejs')
 const Koa = require('koa')
@@ -15,13 +16,15 @@ const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const passport = require('koa-passport')
 const OIDCStrategy = require('passport-openidconnect').Strategy
+const sanitizeHtml = require('sanitize-html')
+const path = require('path')
+const Ajv = require('ajv')
+
 const db = require('./db')
 const event = require('./event')
 
 const app = websockify(new Koa())
 const router = new Router()
-const path = require('path')
-const Ajv = require('ajv')
 const ethernetToDecnet = require('./ethernetToDecnet')
 
 const resolvePath = (...components) => path.join(__dirname, '..', ...components)
@@ -29,7 +32,14 @@ const resolvePath = (...components) => path.join(__dirname, '..', ...components)
 const readFileSync = (...components) =>
   fs.readFileSync(resolvePath(...components), { encoding: 'utf8' })
 
-app.use(koaBody({ multipart: true }))
+app.use(
+  koaBody({
+    multipart: true,
+    jsonLimit: '10mb',
+    textLimit: '10mb',
+    formLimit: '10mb',
+  })
+)
 app.use(koaStatic(resolvePath('public')))
 
 // Session middleware
@@ -265,7 +275,17 @@ router.get('/login', (ctx, next) => {
   next()
 })
 
-router.get('/:page', (ctx, next) => {
+router.get('/hostinfo/:mac_address', async (ctx, next) => {
+  ctx.state.host = await db.getHost(ctx.params.mac_address)
+  ctx.state.editable = ctx.state.user?.id === ctx.state.host?.user_id
+  await next()
+})
+
+router.get('/:page/:arg?', (ctx, next) => {
+  if (ctx.params.page === 'auth') {
+    return next()
+  }
+
   let content = null
   if (fs.existsSync(resolvePath('templates', `${ctx.params.page}.md`))) {
     content = marked.parse(
@@ -319,6 +339,11 @@ const validateHostUpdateSchema = new Ajv().compile({
   additionalProperties: false,
 })
 
+const sanitzeHtmlOptions = {
+  allowedTags: ['h1', 'h2', 'h3', 'h4', 'p', 'strong', 'em', 'pre', 'img', 'a'],
+  allowedSchemes: ['http', 'https', 'data'],
+}
+
 router.put('/api/host/:mac_address', isAuthenticated, async (ctx) => {
   const valid = validateHostUpdateSchema(ctx.request.body)
 
@@ -329,6 +354,12 @@ router.put('/api/host/:mac_address', isAuthenticated, async (ctx) => {
       errors: validateHostUpdateSchema.errors,
     }
     return
+  }
+
+  // Validate the description field
+  const { description } = ctx.request.body
+  if (description) {
+    ctx.request.body.description = sanitizeHtml(description, sanitzeHtmlOptions)
   }
 
   await db.updateHost(
@@ -468,68 +499,6 @@ router.delete('/api/article/:id', isAuthenticated, async (ctx) => {
     [id]
   )
   ctx.status = 204
-})
-
-// Image upload/download
-
-router.post('/api/image/:article', isAuthenticated, async (ctx) => {
-  const client = ctx.state.db
-  const { article } = ctx.params
-  const file = ctx.request.files.image
-
-  const imageData = fs.readFileSync(file.filepath)
-  const mimeType = file.mimetype
-  const name = file.originalFilename
-
-  await client.query(
-    `INSERT INTO image (article, name, data, mime_type)
-     VALUES ($1, $2, $3, $4)`,
-    [article, name, imageData, mimeType]
-  )
-
-  ctx.status = 200
-  ctx.body = { url: `/api/image/${article}/${name}` }
-})
-
-router.get('/api/image/:article/:name', async (ctx) => {
-  const client = ctx.state.db
-  const { article, name } = ctx.params
-  const result = await client.query(
-    `SELECT data, mime_type
-     FROM image
-     WHERE article = $1
-       AND name = $2`,
-    [article, name]
-  )
-
-  if (result.rows.length > 0) {
-    const { data, mime_type } = result.rows[0]
-    ctx.type = mime_type
-    ctx.body = data
-  } else {
-    ctx.status = 404
-    ctx.body = 'Image not found'
-  }
-})
-
-router.delete('/api/image/:article/:name', isAuthenticated, async (ctx) => {
-  const client = ctx.state.db
-  const { article, name } = ctx.params
-
-  const result = await client.query(
-    `DELETE
-     FROM image
-     WHERE article = $1
-       AND name = $2`,
-    [article, name]
-  )
-
-  if (result.rowCount > 0) {
-    ctx.status = 204
-  } else {
-    ctx.status = 404
-    ctx.body = 'Image not found'
-  }
 })
 
 // WebSocket route

@@ -132,12 +132,76 @@ const getActiveHosts = async () =>
 const getAllHosts = async () =>
   withClient(async (client) => {
     const result = await client.query(
-      `SELECT h.*, u.name AS owner
+      `SELECT 
+           h.mac_address,
+           h.created,
+           h.last_seen,
+           h.user_id,
+           h.name,
+           h.protocols,
+           h.hardware,
+           h.software,
+           h.blacklisted,
+           u.name AS owner
        FROM host h
                 JOIN "user" u ON u.id = h.user_id
        ORDER BY u.name, h.mac_address::VARCHAR`
     )
     return result.rows
+  })
+
+const getHost = async (macAddress) =>
+  withClient(async (client) => {
+    const result = await client.query(
+      `
+          SELECT
+              h.mac_address,
+              h.created,
+              h.last_seen,
+              h.user_id,
+              u.name as owner,
+              h.name,
+              h.description,
+              ARRAY_AGG(
+                      p.number || ',' || p.name || ',' || p.description
+                      ORDER BY p.number
+              ) AS protocols,
+              h.hardware,
+              h.software,
+              h.blacklisted
+          FROM
+              host h
+                  LEFT JOIN protocol p ON p.number = ANY(h.protocols)
+                  JOIN "user" u ON u.id = h.user_id
+          WHERE
+              mac_address = $1
+          GROUP BY
+              h.mac_address,
+              h.created,
+              h.last_seen,
+              h.user_id,
+              u.name,
+              h.name,
+              h.description,
+              h.hardware,
+              h.software,
+              h.blacklisted`,
+      [macAddress]
+    )
+    const rows = result.rows.map((row) => {
+      return {
+        ...row,
+        protocols: row.protocols.map((proto) => {
+          const fields = proto.split(',', 3)
+          return {
+            number: parseInt(fields[0]),
+            name: fields[1],
+            description: fields[2],
+          }
+        }),
+      }
+    })
+    return rows[0]
   })
 
 const updateHost = async (
@@ -211,6 +275,7 @@ module.exports = {
   resetPassword,
   setPassword,
   touchHosts,
+  getHost,
   getAllHosts,
   getActiveHosts,
   updateHost,

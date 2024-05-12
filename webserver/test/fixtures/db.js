@@ -1,6 +1,7 @@
 const util = require('node:util')
 const exec = util.promisify(require('node:child_process').exec)
 const path = require('path')
+const db = require('../../src/db')
 
 const migrateScript = path.join(__dirname, '../../../db/migrate.sh')
 
@@ -13,6 +14,7 @@ const up = async () => {
 }
 
 const down = async () => {
+  await db.closePool()
   await exec(`dropdb ${process.env.PGDATABASE}`)
 }
 

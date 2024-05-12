@@ -1,0 +1,53 @@
+#editor, table {
+    margin-bottom: 2em;
+}
+
+h4 {
+    margin-bottom: 1em;
+}
+
+[disabled] {
+    display: none;
+}
+
+.save-success {
+    animation: success-animation 0.3s alternate 2;
+}
+
+@keyframes success-animation {
+    0%, 100% {
+        background-color: white;
+    }
+    50% {
+        background-color: green;
+    }
+}
+
+.save-failure {
+    animation: failure-animation 0.3s alternate 2;
+}
+
+@keyframes failure-animation {
+    0%, 100% {
+        background-color: white;
+    }
+    50% {
+        background-color: red;
+    }
+}
+
+td[contenteditable="true"] {
+    background-image: url('pencil.png');
+    background-repeat: no-repeat;
+    background-size: auto 50%;
+    background-position: right center;
+    padding-right: 30px;
+}
+
+td[data-own-mac-address="true"] {
+    background-image: url('eye.png');
+    background-repeat: no-repeat;
+    background-size: auto 50%;
+    background-position: right center;
+    padding-right: 30px;
+}

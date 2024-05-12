@@ -5,7 +5,6 @@
   <thead>
   <tr>
     <th>Name</th>
-    <th>MAC-Adresse</th>
     <th>Hardware</th>
     <th>Software</th>
     <th>Protokolle</th>
@@ -15,11 +14,12 @@
   <tbody>
   <% for (let i = 0; i < hosts.length; i++) { const host = hosts[i] %>
   <% if (host.editable || !host.blacklisted) { %>
-  <tr data-mac-address="<%= host.mac_address %>" data-blacklisted="<%= host.blacklisted %>">
-    <td data-field="name" contenteditable="<%= host.editable %>"><%= host.name %></td>
-    <td data-own-mac-address="<%= host.editable %>" title="<%= host.vendor %>"><%= host.mac_address %></td>
-    <td data-field="hardware" contenteditable="<%= host.editable %>"><%= host.hardware %></td>
-    <td data-field="software" contenteditable="<%= host.editable %>"><%= host.software %></td>
+  <tr data-mac-address="<%= host.mac_address %>"
+      data-blacklisted="<%= host.blacklisted %>"
+      onclick="document.location = '/hostinfo/<%= host.mac_address %>'">
+    <td data-field="name"><%= host.name %></td>
+    <td data-field="hardware"><%= host.hardware %></td>
+    <td data-field="software"><%= host.software %></td>
     <td><%- host.protocols?.map(({ name, description}) => `<span title="${description}" class="protocol">${name}</span>`).join(' ') %>
     </td>
     <td><%= host.owner %></td>
@@ -32,16 +32,6 @@
   Auf dieser Seite wird angezeigt, welche Rechner gerade über
   RetroStar zu erreichen sind.  Wenn eine Maschine für 5 Minuten nicht
   mehr auf der Bridge aktiv war, wird sie aus der Liste gelöscht.
+  Mit Mausklick auf einen Eintrag kannst Du Details zum jeweiligen
+  System anzeigen und für Deine eigenen Systeme auch ändern.
 </p>
-<% if (typeof user == 'object') { %>
-<p>
-  Du kannst die Datenbankeinträge für Deine Systeme direkt bearbeiten, indem
-  Du in eines mit einem Stift <img src="pencil.png" height="15"/> gekennzeichneten Felder
-  klickst.  Änderungen werden gespeichert, sobald Du ENTER drückst oder das
-  Feld verlässt.
-  Durch Klick auf das Auge <img src="eye.png" height="15"/> kannst Du einen Host
-  für andere Benutzer unsichtbar machen.  Ein weiterer Klick macht ihn wieder
-  sichtbar.
-</p>
-<% } %>
-<script src="status.js"></script>

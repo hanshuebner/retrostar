@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title><%= page_name; %></title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
     <% if (typeof user == "object") { %>
-        <link rel="stylesheet" href="event-log.css">
+        <link rel="stylesheet" href="/event-log.css">
     <% } %>
 </head>
 <body>
@@ -13,24 +13,24 @@
 <header>
     <div class="headerLeft">
         <div class="logoBox">
-            <img class="logo" src="retrostar-logo.jpg" alt="RetroStar Logo">
+            <img class="logo" src="/retrostar-logo.jpg" alt="RetroStar Logo">
             <h1>RetroStar</h1>
         </div>
         <nav class="mainNav">
             <ul class="menu">
                 <li class="<%= page_name == "status" ? "active" : ""; %>">
-                    <a href="status">Status</a>
+                    <a href="/status">Status</a>
                 </li>
                 <% if (typeof user == "object") { %>
                     <li class="<%= page_name == "lat" ? "active" : ""; %>">
-                        <a href="lat">LAT Terminal</a>
+                        <a href="/lat">LAT Terminal</a>
                     </li>
                     <li class="<%= page_name == "installation" ? "active" : ""; %>">
-                        <a href="installation">Installation</a>
+                        <a href="/installation">Installation</a>
                     </li>
                 <% } %>
                 <li class="<%= page_name == "about" ? "active" : ""; %>">
-                    <a href="about">Über Retrostar</a>
+                    <a href="/about">Über Retrostar</a>
                 </li>
             </ul>
         </nav>
@@ -50,7 +50,7 @@
                             <button type="submit" class="logout-btn function">Logout</button>
                         </form>
                     <% } else { %>
-                        <form action="/auth" method="get">
+                        <form action="auth" method="get">
                             <button type="submit" class="logout-btn">Login</button>
                         </form>
                     <% } %>
@@ -75,8 +75,8 @@
 <% if (typeof user == "object") { %>
     <div id="event-log-container">
         <div id="event-log"></div>
-        <img id="event-log-icon" src="log.svg" width="40" height="40"/>
-        <script src="event-log.js"></script>
+        <img id="event-log-icon" src="/log.svg" width="40" height="40"/>
+        <script src="/event-log.js"></script>
     </div>
 <% } %>
 </body>

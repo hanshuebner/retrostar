@@ -258,3 +258,7 @@ footer {
     margin-left: 72px;
     margin-top: 192px;
 }
+
+footer p {
+    font-size: small;
+}

@@ -1,0 +1,37 @@
+<link href="/quill/quill.snow.css" rel="stylesheet">
+<link href="/hostinfo.css" rel="stylesheet">
+<script src="/quill/quill.js"></script>
+<script src="/quill-image-drop-and-paste.min.js"></script>
+
+<h3>Katalogseite</h3>
+<table>
+  <tr>
+    <th>Name</th>
+    <td data-field="name" contenteditable="<%= editable %>"><%= host.name %></td>
+  </tr>
+  <tr>
+    <th>MAC-Adresse</th>
+    <td title="<%= host.vendor %>"><%= host.mac_address %></td>
+  </tr>
+  <tr>
+    <th>Hardware</th>
+    <td data-field="hardware" contenteditable="<%= editable %>"><%= host.hardware %></td>
+  </tr>
+  <tr>
+    <th>Software</th>
+    <td data-field="software" contenteditable="<%= editable %>"><%= host.software %></td>
+  </tr>
+  <tr>
+    <th>Protokolle</th>
+    <td><%- host.protocols?.map(({ name, description }) => `<span title="${description}" class="protocol">${name}</span>`).join(' ') %>
+    </td>
+  </tr>
+  <tr>
+    <th>Besitzer</th>
+    <td><%= host.owner %></td>
+  </tr>
+</table>
+<h4>Systembeschreibung</h4>
+<div id="editor" data-editable="<%= !!editable %>"><%- host.description %></div>
+<button id="save" disabled>Speichern</button>
+<script src="/hostinfo.js"></script>
