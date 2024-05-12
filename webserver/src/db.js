@@ -118,7 +118,19 @@ const touchHosts = async (usersAndHosts) =>
 const getActiveHosts = async () =>
   withClient(async (client) => {
     const result = await client.query(
-      `SELECT h.*, u.name AS owner, ev.vendor
+      `SELECT
+           h.mac_address,
+           h.created,
+           h.last_seen,
+           h.user_id,
+           h.name,
+           h.protocols,
+           h.hardware,
+           h.software,
+           h.blacklisted,
+           u.name AS owner,
+           coalesce(h.description, '') <> '' as has_description,
+           ev.vendor
        FROM host h
                 JOIN "user" u ON u.id = h.user_id
                 LEFT OUTER JOIN ethernet_vendor ev ON (h.mac_address & 'ff:ff:ff:00:00:00'::macaddr) = ev.mac_prefix
@@ -142,7 +154,8 @@ const getAllHosts = async () =>
            h.hardware,
            h.software,
            h.blacklisted,
-           u.name AS owner
+           u.name AS owner,
+           coalesce(h.description, '') <> '' as has_description 
        FROM host h
                 JOIN "user" u ON u.id = h.user_id
        ORDER BY u.name, h.mac_address::VARCHAR`

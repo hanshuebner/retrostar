@@ -2,6 +2,10 @@ tbody tr[data-blacklisted="true"] {
     text-decoration: line-through;
 }
 
+tbody tr[data-has-description="true"] td {
+    font-weight: bold;
+}
+
 tbody tr {
     cursor: pointer;
 }

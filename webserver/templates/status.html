@@ -16,6 +16,7 @@
   <% if (host.editable || !host.blacklisted) { %>
   <tr data-mac-address="<%= host.mac_address %>"
       data-blacklisted="<%= host.blacklisted %>"
+      data-has-description="<%= host.has_description %>"
       onclick="document.location = '/hostinfo/<%= host.mac_address %>'">
     <td data-field="name"><%= host.name %></td>
     <td data-field="hardware"><%= host.hardware %></td>
