@@ -15,10 +15,7 @@ const initCatalogEntryEditor = async () => {
             ['bold', 'italic', 'underline'],
             ['link', 'code-block'],
           ],
-          imageDropAndPaste: {
-            handler: () => console.log('image dropped'),
-            autoConvert: false,
-          },
+          imageDropAndPaste: {},
         },
       }
     : {
