@@ -8,6 +8,7 @@ const initCatalogEntryEditor = async () => {
     theme: 'snow',
   }
 
+  Quill.register('modules/imageCompressor', imageCompressor)
   const quillConfig = editable
     ? {
         modules: {
@@ -16,7 +17,9 @@ const initCatalogEntryEditor = async () => {
             ['bold', 'italic', 'underline'],
             ['link', 'code-block'],
           ],
-          imageDropAndPaste: {},
+          imageCompressor: {
+            quality: 0.9,
+          },
         },
       }
     : {
@@ -40,7 +43,9 @@ const initCatalogEntryEditor = async () => {
     const response = await fetch(`/api/host/${macAddress}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: quill.getSemanticHTML() }),
+      body: JSON.stringify({
+        description: document.getElementById('editor').innerHTML,
+      }),
     })
     document.getElementById('save-in-progress').style.display = 'none'
     const saveStatus = response.ok ? 'save-success' : 'save-failure'
