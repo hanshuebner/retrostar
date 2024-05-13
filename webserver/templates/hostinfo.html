@@ -39,5 +39,8 @@
 <h4>Systembeschreibung</h4>
 <div id="editor" data-editable="<%= !!editable %>"><%- host.description %></div>
 <button id="save" disabled>Speichern</button>
+<p class="save-status" id="save-in-progress">Änderungen werden gespeichert</p>
+<p class="save-status" id="save-success">Änderungen wurden gespeichert</p>
+<p class="save-status" id="save-failure">Fehler beim Speichern: <span id="save-failure-message"></span></p>
 <% } %>
 <script src="/hostinfo.js"></script>

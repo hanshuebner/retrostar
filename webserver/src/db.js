@@ -155,7 +155,7 @@ const getAllHosts = async () =>
            h.software,
            h.blacklisted,
            u.name AS owner,
-           coalesce(h.description, '') <> '' as has_description 
+           coalesce(h.description, '') <> '' as has_description
        FROM host h
                 JOIN "user" u ON u.id = h.user_id
        ORDER BY u.name, h.mac_address::VARCHAR`

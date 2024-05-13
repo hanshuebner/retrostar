@@ -35,9 +35,9 @@ const readFileSync = (...components) =>
 app.use(
   koaBody({
     multipart: true,
-    jsonLimit: '10mb',
-    textLimit: '10mb',
-    formLimit: '10mb',
+    jsonLimit: '20mb',
+    textLimit: '20mb',
+    formLimit: '20mb',
   })
 )
 app.use(koaStatic(resolvePath('public')))

@@ -51,3 +51,7 @@ td[data-own-mac-address="true"] {
     background-position: right center;
     padding-right: 30px;
 }
+
+.save-status {
+    display: none
+}

@@ -36,11 +36,23 @@ const initCatalogEntryEditor = async () => {
   })
   saveButton.addEventListener('click', async () => {
     saveButton.setAttribute('disabled', true)
+    document.getElementById('save-in-progress').style.display = 'block'
     const response = await fetch(`/api/host/${macAddress}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ description: quill.getSemanticHTML() }),
     })
+    document.getElementById('save-in-progress').style.display = 'none'
+    const saveStatus = response.ok ? 'save-success' : 'save-failure'
+    if (!response.ok) {
+      document.getElementById('save-failure-message').innerHTML =
+        response.statusText
+    }
+    document.getElementById(saveStatus).style.display = 'block'
+    setTimeout(
+      () => (document.getElementById(saveStatus).style.display = 'none'),
+      2000
+    )
   })
 }
 
