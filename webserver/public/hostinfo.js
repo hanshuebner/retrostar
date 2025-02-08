@@ -38,7 +38,7 @@ const initCatalogEntryEditor = async () => {
     saveButton.removeAttribute('disabled')
   })
   saveButton.addEventListener('click', async () => {
-    saveButton.setAttribute('disabled', true)
+    saveButton.setAttribute('disabled', 'true')
     document.getElementById('save-in-progress').style.display = 'block'
     const response = await fetch(`/api/host/${macAddress}`, {
       method: 'PUT',
@@ -81,7 +81,7 @@ const sendData = async (element, macAddress) => {
 const handleKeyDown = async (event, element, macAddress) => {
   if (event.key === 'Enter' || event.keyCode === 13) {
     event.preventDefault()
-    sendData(element, macAddress)
+    await sendData(element, macAddress)
   }
 }
 
