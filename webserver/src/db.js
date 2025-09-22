@@ -204,7 +204,7 @@ const getHost = async (macAddress) =>
     const rows = result.rows.map((row) => {
       return {
         ...row,
-        protocols: row.protocols.map((proto) => {
+        protocols: row.protocols.filter((proto) => proto).map((proto) => {
           const fields = proto.split(',', 3)
           return {
             number: parseInt(fields[0]),
