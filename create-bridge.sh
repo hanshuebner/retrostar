@@ -19,3 +19,7 @@ ebtables -A FORWARD --protocol ipv6 -j DROP
 ebtables -A INPUT --protocol arp -j DROP
 ebtables -A INPUT --protocol ipv4 -j DROP
 ebtables -A INPUT --protocol ipv6 -j DROP
+
+# fritz.box zeug:
+ebtables -A FORWARD --protocol 0x88e1 -j DROP
+ebtables -A FORWARD --protocol 0x8912 -j DROP
